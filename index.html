@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VSTG.RTW — Servicios digitales premium: streaming, crecimiento en redes sociales y edición profesional.">
+    <title>VSTG.RTW — Servicios Digitales</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ============ LOADER ============ -->
+    <div class="loader" id="loader">
+        <div class="loader-text">VSTG.RTW</div>
+        <div class="loader-bar"></div>
+    </div>
+
+    <!-- ============ NAVBAR ============ -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#hero" class="logo">
+                <span class="logo-mark">▣</span>
+                <span class="logo-text">VSTG.RTW</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#streaming">Streaming</a></li>
+                <li><a href="#redes">Redes</a></li>
+                <li><a href="#edicion">Edición</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="cart-btn" id="cartBtn" aria-label="Abrir carrito">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <path d="M16 10a4 4 0 01-8 0"/>
+                    </svg>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+                <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero" id="hero">
+        <div class="hero-bg">
+            <div class="grid-overlay"></div>
+            <div class="noise"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-tag reveal">— SERVICIOS DIGITALES PREMIUM</div>
+            <h1 class="hero-title reveal">
+                <span class="line">POTENCIA</span>
+                <span class="line">TU</span>
+                <span class="line outline">PRESENCIA</span>
+                <span class="line">DIGITAL</span>
+            </h1>
+            <p class="hero-sub reveal">
+                Streaming, crecimiento en redes y edición profesional.
+                Todo lo que necesitas para dominar el mundo digital, en un solo lugar.
+            </p>
+            <div class="hero-cta reveal">
+                <a href="#streaming" class="btn btn-primary">EXPLORAR SERVICIOS</a>
+                <a href="#contacto" class="btn btn-ghost">CONTACTO</a>
+            </div>
+            <div class="hero-stats reveal">
+                <div class="stat">
+                    <span class="stat-num" data-target="12500">0</span>
+                    <span class="stat-label">Clientes satisfechos</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-num" data-target="98">0</span><span class="stat-suffix">%</span>
+                    <span class="stat-label">Tasa de éxito</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-num" data-target="24">0</span><span class="stat-suffix">/7</span>
+                    <span class="stat-label">Soporte</span>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span>SCROLL</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <!-- ============ MARQUEE ============ -->
+    <div class="marquee">
+        <div class="marquee-track">
+            <span>▲ STREAMING</span><span>● CRECIMIENTO</span><span>◆ EDICIÓN</span>
+            <span>▲ NETFLIX</span><span>● INSTAGRAM</span><span>◆ TIKTOK</span>
+            <span>▲ SPOTIFY</span><span>● YOUTUBE</span><span>◆ PREMIERE PRO</span>
+            <span>▲ STREAMING</span><span>● CRECIMIENTO</span><span>◆ EDICIÓN</span>
+            <span>▲ NETFLIX</span><span>● INSTAGRAM</span><span>◆ TIKTOK</span>
+            <span>▲ SPOTIFY</span><span>● YOUTUBE</span><span>◆ PREMIERE PRO</span>
+        </div>
+    </div>
+
+    <!-- ============ STREAMING ============ -->
+    <section class="section" id="streaming">
+        <div class="section-header">
+            <span class="section-num">01 / 03</span>
+            <h2 class="section-title">STREAMING</h2>
+            <p class="section-desc">
+                Acceso premium a tus plataformas favoritas. Cuentas compartidas y personales
+                con garantía de funcionamiento y soporte 24/7.
+            </p>
+        </div>
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="peliculas">Películas</button>
+            <button class="filter-btn" data-filter="musica">Música</button>
+            <button class="filter-btn" data-filter="deportes">Deportes</button>
+        </div>
+        <div class="products-grid" id="streamingGrid">
+            <!-- Productos se inyectan desde JS -->
+        </div>
+    </section>
+
+    <!-- ============ REDES ============ -->
+    <section class="section section-alt" id="redes">
+        <div class="section-header">
+            <span class="section-num">02 / 03</span>
+            <h2 class="section-title">CRECIMIENTO EN REDES</h2>
+            <p class="section-desc">
+                Impulsa tu presencia social con estrategias orgánicas y pagas.
+                Seguidores, engagement y alcance reales que impulsan tu marca.
+            </p>
+        </div>
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="instagram">Instagram</button>
+            <button class="filter-btn" data-filter="tiktok">TikTok</button>
+            <button class="filter-btn" data-filter="youtube">YouTube</button>
+        </div>
+        <div class="products-grid" id="redesGrid">
+            <!-- Productos se inyectan desde JS -->
+        </div>
+    </section>
+
+    <!-- ============ EDICIÓN ============ -->
+    <section class="section" id="edicion">
+        <div class="section-header">
+            <span class="section-num">03 / 03</span>
+            <h2 class="section-title">EDICIÓN</h2>
+            <p class="section-desc">
+                Servicios profesionales de edición de video, foto y diseño.
+                Calidad cinematográfica entregada en tiempos récord.
+            </p>
+        </div>
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="video">Video</button>
+            <button class="filter-btn" data-filter="foto">Foto</button>
+            <button class="filter-btn" data-filter="diseno">Diseño</button>
+        </div>
+        <div class="products-grid" id="edicionGrid">
+            <!-- Productos se inyectan desde JS -->
+        </div>
+    </section>
+
+    <!-- ============ PROCESS ============ -->
+    <section class="process">
+        <div class="section-header">
+            <span class="section-num">CÓMO FUNCIONA</span>
+            <h2 class="section-title">PROCESO SIMPLE</h2>
+        </div>
+        <div class="process-steps">
+            <div class="step">
+                <span class="step-num">01</span>
+                <h3>SELECCIONA</h3>
+                <p>Elige el servicio que necesitas de nuestro catálogo. Streaming, redes o edición.</p>
+            </div>
+            <div class="step">
+                <span class="step-num">02</span>
+                <h3>PAGA</h3>
+                <p>Checkout seguro con múltiples métodos de pago. Confirmación instantánea.</p>
+            </div>
+            <div class="step">
+                <span class="step-num">03</span>
+                <h3>RECIBE</h3>
+                <p>Entrega inmediata vía email o panel. Soporte post-venta garantizado.</p>
+            </div>
+            <div class="step">
+                <span class="step-num">04</span>
+                <h3>DISFRUTA</h3>
+                <p>Activa tu servicio y comienza a disfrutar. Renovación automática disponible.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ TESTIMONIALS ============ -->
+    <section class="testimonials">
+        <div class="section-header">
+            <span class="section-num">TESTIMONIOS</span>
+            <h2 class="section-title">CLIENTES REALES</h2>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial">
+                <div class="stars">★★★★★</div>
+                <p>"Compré una cuenta de Netflix hace 6 meses y sigue funcionando perfectamente. Soporte rapidísimo."</p>
+                <div class="testimonial-author">
+                    <div class="avatar">M</div>
+                    <div>
+                        <strong>Martín R.</strong>
+                        <span>Cliente verificado</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial">
+                <div class="stars">★★★★★</div>
+                <p>"El paquete de crecimiento en Instagram superó mis expectativas. Pasé de 2K a 15K en 3 meses."</p>
+                <div class="testimonial-author">
+                    <div class="avatar">L</div>
+                    <div>
+                        <strong>Lucía P.</strong>
+                        <span>Cliente verificado</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial">
+                <div class="stars">★★★★★</div>
+                <p>"La edición de mi video para YouTube quedó cinematográfica. Entrega en 48h como prometieron."</p>
+                <div class="testimonial-author">
+                    <div class="avatar">D</div>
+                    <div>
+                        <strong>Diego T.</strong>
+                        <span>Cliente verificado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2 class="cta-title">¿LISTO PARA<br>EMPEZAR?</h2>
+            <p>Únete a más de 12,500 clientes que ya potencian su presencia digital con VSTG.RTW.</p>
+            <a href="#streaming" class="btn btn-primary btn-large">VER SERVICIOS</a>
+        </div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="footer" id="contacto">
+        <div class="footer-grid">
+            <div class="footer-col footer-brand">
+                <a href="#hero" class="logo">
+                    <span class="logo-mark">▣</span>
+                    <span class="logo-text">VSTG.RTW</span>
+                </a>
+                <p>Servicios digitales premium. Streaming, redes y edición profesional con garantía total.</p>
+                <div class="social">
+                    <a href="#" aria-label="Instagram">IG</a>
+                    <a href="#" aria-label="Twitter">TW</a>
+                    <a href="#" aria-label="TikTok">TK</a>
+                    <a href="#" aria-label="Discord">DC</a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>SERVICIOS</h4>
+                <ul>
+                    <li><a href="#streaming">Streaming</a></li>
+                    <li><a href="#redes">Crecimiento Redes</a></li>
+                    <li><a href="#edicion">Edición</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>SOPORTE</h4>
+                <ul>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Términos</a></li>
+                    <li><a href="#">Privacidad</a></li>
+                    <li><a href="#">Garantía</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>CONTACTO</h4>
+                <ul>
+                    <li>soporte@vstg.rtw</li>
+                    <li>+1 234 567 890</li>
+                    <li>Discord: VSTG.RTW</li>
+                    <li>Horario: 24/7</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>© 2025 VSTG.RTW — Todos los derechos reservados.</span>
+            <span> Diseñado con precisión minimalista.</span>
+        </div>
+    </footer>
+
+    <!-- ============ CART DRAWER ============ -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <aside class="cart-drawer" id="cartDrawer">
+        <div class="cart-header">
+            <h3>TU CARRITO <span class="cart-badge" id="cartBadge">0</span></h3>
+            <button class="cart-close" id="cartClose" aria-label="Cerrar carrito">✕</button>
+        </div>
+        <div class="cart-body" id="cartBody">
+            <div class="cart-empty" id="cartEmpty">
+                <div class="cart-empty-icon">▣</div>
+                <p>Tu carrito está vacío</p>
+                <span>Agrega servicios para continuar</span>
+            </div>
+        </div>
+        <div class="cart-footer" id="cartFooter" style="display:none;">
+            <div class="cart-total">
+                <span>TOTAL</span>
+                <span class="cart-total-amount" id="cartTotal">$0.00</span>
+            </div>
+            <button class="btn btn-primary btn-block" id="checkoutBtn">PROCEDER AL PAGO</button>
+            <button class="btn btn-ghost btn-block" id="clearCartBtn">VACIAR CARRITO</button>
+        </div>
+    </aside>
+
+    <!-- ============ TOAST ============ -->
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
