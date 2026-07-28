@@ -1,6 +1,8 @@
 /* ============================================================
-   VSTG.RTW — Main Script
-   Streaming + Redes (PEN), profile/link modal, WhatsApp checkout
+   VSTG.RTW — Main Script (v3)
+   - Streaming: profile + PIN
+   - Redes: cantidad (selector) + link + notas
+   - WhatsApp checkout with full message
    ============================================================ */
 
 // ---------- CONFIG ----------
@@ -19,43 +21,103 @@ const STREAMING_PRODUCTS = [
 ];
 
 // ---------- REDES PRODUCTS ----------
-// 4 categorías (seguidores, likes, comentarios, vistas) × 3 plataformas (Instagram, Facebook, TikTok)
+// Each product has options: [{label, qty, price}] — user picks from select
 const REDES_PRODUCTS = {
     seguidores: [
-        { id: 'sg-ig-1k', name: '1,000 Seguidores Instagram', icon: 'IG', desc: 'Seguidores reales y estables para tu cuenta de Instagram.', price: 12, features: ['Seguidores reales', 'Entrega gradual 1-3 días', 'Sin contraseña', 'Garantía reposición 30 días'] },
-        { id: 'sg-ig-5k', name: '5,000 Seguidores Instagram', icon: 'IG', desc: 'Paquete intermedio para acelerar tu crecimiento en Instagram.', price: 45, features: ['Seguidores reales', 'Entrega gradual 3-5 días', 'Sin contraseña', 'Garantía reposición 30 días'] },
-        { id: 'sg-fb-1k', name: '1,000 Seguidores Facebook',  icon: 'FB', desc: 'Impulsa tu página de Facebook con seguidores reales y activos.', price: 15, features: ['Seguidores reales', 'Entrega 2-4 días', 'Sin contraseña', 'Garantía reposición'] },
-        { id: 'sg-fb-5k', name: '5,000 Seguidores Facebook',  icon: 'FB', desc: 'Mayor alcance y credibilidad para tu fanpage o perfil público.', price: 55, features: ['Seguidores reales', 'Entrega 3-6 días', 'Sin contraseña', 'Garantía reposición'] },
-        { id: 'sg-tk-1k', name: '1,000 Seguidores TikTok',    icon: 'TK', desc: 'Crece en TikTok con seguidores estables, sin riesgo de baneo.', price: 10, features: ['Seguidores reales', 'Entrega 1-3 días', 'Sin riesgo de baneo', 'Garantía 30 días'] },
-        { id: 'sg-tk-5k', name: '5,000 Seguidores TikTok',    icon: 'TK', desc: 'Alcance masivo para tu cuenta de TikTok y mayor viralidad.', price: 40, features: ['Seguidores reales', 'Entrega 2-4 días', 'Sin riesgo de baneo', 'Garantía 30 días'] }
+        { id: 'sg-ig', name: 'Seguidores Instagram', icon: 'IG', desc: 'Seguidores reales y estables para tu cuenta de Instagram.', features: ['Seguidores reales', 'Entrega gradual', 'Sin contraseña', 'Garantía reposición 30 días'],
+          options: [
+            { label: '1,000 seguidores', qty: 1000, price: 12 },
+            { label: '5,000 seguidores', qty: 5000, price: 45 },
+            { label: '10,000 seguidores', qty: 10000, price: 80 }
+          ]
+        },
+        { id: 'sg-fb', name: 'Seguidores Facebook',  icon: 'FB', desc: 'Impulsa tu página de Facebook con seguidores reales y activos.', features: ['Seguidores reales', 'Entrega gradual', 'Sin contraseña', 'Garantía reposición'],
+          options: [
+            { label: '1,000 seguidores', qty: 1000, price: 15 },
+            { label: '5,000 seguidores', qty: 5000, price: 55 },
+            { label: '10,000 seguidores', qty: 10000, price: 100 }
+          ]
+        },
+        { id: 'sg-tk', name: 'Seguidores TikTok',    icon: 'TK', desc: 'Crece en TikTok con seguidores estables, sin riesgo de baneo.', features: ['Seguidores reales', 'Entrega gradual', 'Sin riesgo de baneo', 'Garantía 30 días'],
+          options: [
+            { label: '1,000 seguidores', qty: 1000, price: 10 },
+            { label: '5,000 seguidores', qty: 5000, price: 40 },
+            { label: '10,000 seguidores', qty: 10000, price: 70 }
+          ]
+        }
     ],
     likes: [
-        { id: 'lk-ig-1k', name: '1,000 Likes Instagram',  icon: 'IG', desc: 'Likes reales para tus publicaciones de Instagram, baja caída.', price: 8,  features: ['Likes reales', 'Reparto gradual', 'Baja caída', 'Garantía 30 días'] },
-        { id: 'lk-ig-5k', name: '5,000 Likes Instagram',  icon: 'IG', desc: 'Mayor visibilidad en el feed con miles de likes en tu post.', price: 30, features: ['Likes reales', 'Reparto gradual', 'Baja caída', 'Garantía 30 días'] },
-        { id: 'lk-fb-1k', name: '1,000 Likes Facebook',   icon: 'FB', desc: 'Likes para tus publicaciones o página de Facebook.', price: 10, features: ['Likes reales', 'Reparto gradual', 'Estables', 'Garantía reposición'] },
-        { id: 'lk-fb-5k', name: '5,000 Likes Facebook',   icon: 'FB', desc: 'Impulsa tus posts con miles de likes en Facebook.', price: 38, features: ['Likes reales', 'Reparto gradual', 'Estables', 'Garantía reposición'] },
-        { id: 'lk-tk-1k', name: '1,000 Likes TikTok',     icon: 'TK', desc: 'Likes para tus videos de TikTok y mayor viralidad.', price: 6,  features: ['Likes reales', 'Reparto gradual', 'Sin riesgo de baneo', 'Garantía 30 días'] },
-        { id: 'lk-tk-5k', name: '5,000 Likes TikTok',     icon: 'TK', desc: 'Empuja tus videos al feed For You con miles de likes.', price: 22, features: ['Likes reales', 'Reparto gradual', 'Sin riesgo de baneo', 'Garantía 30 días'] }
+        { id: 'lk-ig', name: 'Likes Instagram',  icon: 'IG', desc: 'Likes reales para tus publicaciones de Instagram, baja caída.', features: ['Likes reales', 'Reparto gradual', 'Baja caída', 'Garantía 30 días'],
+          options: [
+            { label: '1,000 likes', qty: 1000, price: 8 },
+            { label: '5,000 likes', qty: 5000, price: 30 },
+            { label: '10,000 likes', qty: 10000, price: 50 }
+          ]
+        },
+        { id: 'lk-fb', name: 'Likes Facebook',   icon: 'FB', desc: 'Likes para tus publicaciones o página de Facebook.', features: ['Likes reales', 'Reparto gradual', 'Estables', 'Garantía reposición'],
+          options: [
+            { label: '1,000 likes', qty: 1000, price: 10 },
+            { label: '5,000 likes', qty: 5000, price: 38 },
+            { label: '10,000 likes', qty: 10000, price: 65 }
+          ]
+        },
+        { id: 'lk-tk', name: 'Likes TikTok',     icon: 'TK', desc: 'Likes para tus videos de TikTok y mayor viralidad.', features: ['Likes reales', 'Reparto gradual', 'Sin riesgo de baneo', 'Garantía 30 días'],
+          options: [
+            { label: '1,000 likes', qty: 1000, price: 6 },
+            { label: '5,000 likes', qty: 5000, price: 22 },
+            { label: '10,000 likes', qty: 10000, price: 40 }
+          ]
+        }
     ],
     comentarios: [
-        { id: 'cm-ig-100', name: '100 Comentarios Instagram', icon: 'IG', desc: 'Comentarios reales y personalizados para tu publicación de Instagram.', price: 12, features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 1-2 días'] },
-        { id: 'cm-ig-500', name: '500 Comentarios Instagram', icon: 'IG', desc: 'Mayor interacción social con cientos de comentarios relevantes.', price: 50, features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 2-3 días'] },
-        { id: 'cm-fb-100', name: '100 Comentarios Facebook',  icon: 'FB', desc: 'Comentarios reales para tus publicaciones de Facebook.', price: 14, features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 1-2 días'] },
-        { id: 'cm-fb-500', name: '500 Comentarios Facebook',  icon: 'FB', desc: 'Impulsa la conversación con cientos de comentarios en tus posts.', price: 58, features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 2-3 días'] },
-        { id: 'cm-tk-100', name: '100 Comentarios TikTok',    icon: 'TK', desc: 'Comentarios reales para tus videos de TikTok.', price: 10, features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 1-2 días'] },
-        { id: 'cm-tk-500', name: '500 Comentarios TikTok',    icon: 'TK', desc: 'Más engagement y viralidad con cientos de comentarios en TikTok.', price: 45, features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 2-3 días'] }
+        { id: 'cm-ig', name: 'Comentarios Instagram', icon: 'IG', desc: 'Comentarios reales y personalizados para tu publicación de Instagram.', features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 1-2 días'],
+          options: [
+            { label: '100 comentarios', qty: 100, price: 12 },
+            { label: '500 comentarios', qty: 500, price: 50 },
+            { label: '1,000 comentarios', qty: 1000, price: 90 }
+          ]
+        },
+        { id: 'cm-fb', name: 'Comentarios Facebook',  icon: 'FB', desc: 'Comentarios reales para tus publicaciones de Facebook.', features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 1-2 días'],
+          options: [
+            { label: '100 comentarios', qty: 100, price: 14 },
+            { label: '500 comentarios', qty: 500, price: 58 },
+            { label: '1,000 comentarios', qty: 1000, price: 100 }
+          ]
+        },
+        { id: 'cm-tk', name: 'Comentarios TikTok',    icon: 'TK', desc: 'Comentarios reales para tus videos de TikTok.', features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 1-2 días'],
+          options: [
+            { label: '100 comentarios', qty: 100, price: 10 },
+            { label: '500 comentarios', qty: 500, price: 45 },
+            { label: '1,000 comentarios', qty: 1000, price: 80 }
+          ]
+        }
     ],
     vistas: [
-        { id: 'vs-ig-10k', name: '10,000 Vistas Instagram', icon: 'IG', desc: 'Vistas reales para tus Reels o videos de Instagram.', price: 8,  features: ['Vistas reales', 'Entrega rápida', 'Estables', 'Sin contraseña'] },
-        { id: 'vs-ig-50k', name: '50,000 Vistas Instagram', icon: 'IG', desc: 'Mayor alcance en Reels con decenas de miles de vistas.', price: 28, features: ['Vistas reales', 'Entrega gradual', 'Estables', 'Sin contraseña'] },
-        { id: 'vs-fb-10k', name: '10,000 Vistas Facebook',  icon: 'FB', desc: 'Vistas para tus videos publicados en Facebook.', price: 10, features: ['Vistas reales', 'Entrega rápida', 'Estables', 'Sin contraseña'] },
-        { id: 'vs-fb-50k', name: '50,000 Vistas Facebook',  icon: 'FB', desc: 'Impulsa tus videos de Facebook con miles de vistas.', price: 32, features: ['Vistas reales', 'Entrega gradual', 'Estables', 'Sin contraseña'] },
-        { id: 'vs-tk-10k', name: '10,000 Vistas TikTok',    icon: 'TK', desc: 'Vistas reales para tus videos de TikTok, empuja al For You.', price: 5,  features: ['Vistas reales', 'Entrega rápida', 'Sin riesgo de baneo', 'Sin contraseña'] },
-        { id: 'vs-tk-50k', name: '50,000 Vistas TikTok',    icon: 'TK', desc: 'Alcance masivo para tus videos de TikTok con vistas virales.', price: 18, features: ['Vistas reales', 'Entrega gradual', 'Sin riesgo de baneo', 'Sin contraseña'] }
+        { id: 'vs-ig', name: 'Vistas Instagram', icon: 'IG', desc: 'Vistas reales para tus Reels o videos de Instagram.', features: ['Vistas reales', 'Entrega rápida', 'Estables', 'Sin contraseña'],
+          options: [
+            { label: '10,000 vistas', qty: 10000, price: 8 },
+            { label: '50,000 vistas', qty: 50000, price: 28 },
+            { label: '100,000 vistas', qty: 100000, price: 50 }
+          ]
+        },
+        { id: 'vs-fb', name: 'Vistas Facebook',  icon: 'FB', desc: 'Vistas para tus videos publicados en Facebook.', features: ['Vistas reales', 'Entrega gradual', 'Estables', 'Sin contraseña'],
+          options: [
+            { label: '10,000 vistas', qty: 10000, price: 10 },
+            { label: '50,000 vistas', qty: 50000, price: 32 },
+            { label: '100,000 vistas', qty: 100000, price: 55 }
+          ]
+        },
+        { id: 'vs-tk', name: 'Vistas TikTok',    icon: 'TK', desc: 'Vistas reales para tus videos de TikTok, empuja al For You.', features: ['Vistas reales', 'Entrega gradual', 'Sin riesgo de baneo', 'Sin contraseña'],
+          options: [
+            { label: '10,000 vistas', qty: 10000, price: 5 },
+            { label: '50,000 vistas', qty: 50000, price: 18 },
+            { label: '100,000 vistas', qty: 100000, price: 30 }
+          ]
+        }
     ]
 };
 
-// All products flat list (for lookup by id)
+// Flat list of all products for lookup
 const ALL_PRODUCTS = [
     ...STREAMING_PRODUCTS,
     ...Object.values(REDES_PRODUCTS).flat()
@@ -63,12 +125,13 @@ const ALL_PRODUCTS = [
 
 // ---------- CART STATE ----------
 let cart = JSON.parse(localStorage.getItem('vstg_cart') || '[]');
-let pendingProduct = null; // { id, type: 'streaming' | 'redes' }
+let pendingProduct = null; // { id, type }
 
 // ---------- DOM HELPERS ----------
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 const formatPrice = (n) => `${CURRENCY} ${Number(n).toFixed(2)}`;
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ---------- LOADER ----------
 window.addEventListener('load', () => {
@@ -79,22 +142,21 @@ window.addEventListener('load', () => {
 function renderStreaming() {
     const grid = $('#streamingGrid');
     if (!grid) return;
-    grid.innerHTML = STREAMING_PRODUCTS.map(p => productCardHTML(p, 'streaming')).join('');
+    grid.innerHTML = STREAMING_PRODUCTS.map(p => streamingCardHTML(p)).join('');
 }
 
 function renderRedes() {
     Object.entries(REDES_PRODUCTS).forEach(([key, items]) => {
         const grid = $(`#${key}Grid`);
         if (!grid) return;
-        grid.innerHTML = items.map(p => productCardHTML(p, 'redes')).join('');
+        grid.innerHTML = items.map(p => redesCardHTML(p)).join('');
     });
 }
 
-function productCardHTML(p, type) {
-    const btnLabel = type === 'streaming' ? 'ALQUILAR' : 'COMPRAR';
+function streamingCardHTML(p) {
     return `
-        <article class="product-card" data-id="${p.id}" data-type="${type}">
-            <span class="product-tag">${p.icon}</span>
+        <article class="product-card" data-id="${p.id}">
+            <span class="product-tag">PERFIL</span>
             <div class="product-icon">${p.icon}</div>
             <h3 class="product-name">${p.name}</h3>
             <p class="product-desc">${p.desc}</p>
@@ -103,18 +165,41 @@ function productCardHTML(p, type) {
             </ul>
             <div class="product-footer">
                 <div class="product-price">${formatPrice(p.price)}</div>
-                <button class="add-cart-btn" data-add="${p.id}" data-type="${type}">${btnLabel}</button>
+                <button class="add-cart-btn" data-action="open-modal" data-id="${p.id}" data-type="streaming">ALQUILAR</button>
             </div>
         </article>
     `;
 }
 
+function redesCardHTML(p) {
+    // Show starting price (cheapest option)
+    const startingPrice = Math.min(...p.options.map(o => o.price));
+    return `
+        <article class="product-card" data-id="${p.id}">
+            <span class="product-tag">${p.icon}</span>
+            <div class="product-icon">${p.icon}</div>
+            <h3 class="product-name">${p.name}</h3>
+            <p class="product-desc">${p.desc}</p>
+            <ul class="product-features">
+                ${p.features.map(f => `<li>${f}</li>`).join('')}
+            </ul>
+            <div class="product-footer">
+                <div class="product-price">Desde ${formatPrice(startingPrice)}</div>
+                <button class="add-cart-btn" data-action="open-modal" data-id="${p.id}" data-type="redes">COMPRAR</button>
+            </div>
+        </article>
+    `;
+}
+
+// ---------- BIND ALL "ALQUILAR/COMPRAR" BUTTONS ----------
+// Critical: use event delegation so it works on dynamically injected buttons
 function bindAddButtons() {
-    $$('[data-add]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openModal(btn.dataset.add, btn.dataset.type);
-        });
+    document.body.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action="open-modal"]');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        openModal(btn.dataset.id, btn.dataset.type);
     });
 }
 
@@ -128,30 +213,45 @@ function openModal(id, type) {
     const p = findProduct(id);
     if (!p) return;
     pendingProduct = { id, type };
+
     $('#modalServiceName').textContent = p.name;
     $('#modalServiceDesc').textContent = p.desc;
-    $('#modalServicePrice').textContent = formatPrice(p.price);
     $('#modalTag').textContent = type === 'streaming' ? 'CONFIGURA TU PERFIL' : 'CONFIGURA TU PEDIDO';
 
-    // Reset fields
+    // Reset all fields
     $('#profileName').value = '';
     $('#profilePin').value = '';
     $('#redesLink').value = '';
     $('#redesNote').value = '';
-    $('#profileName').classList.remove('invalid');
-    $('#profilePin').classList.remove('invalid');
-    $('#redesLink').classList.remove('invalid');
+    ['profileName', 'profilePin', 'redesLink'].forEach(id => $('#' + id).classList.remove('invalid'));
 
-    // Toggle field groups
-    $('#formFieldsStreaming').style.display = type === 'streaming' ? 'block' : 'none';
-    $('#formFieldsRedes').style.display = type === 'redes' ? 'block' : 'none';
+    if (type === 'streaming') {
+        $('#formFieldsStreaming').style.display = 'block';
+        $('#formFieldsRedes').style.display = 'none';
+        $('#modalServicePrice').textContent = formatPrice(p.price);
+        setTimeout(() => $('#profileName').focus(), 300);
+    } else {
+        $('#formFieldsStreaming').style.display = 'none';
+        $('#formFieldsRedes').style.display = 'block';
+        // Build the quantity select
+        const select = $('#redesCantidad');
+        select.innerHTML = p.options.map((opt, i) =>
+            `<option value="${i}" data-qty="${opt.qty}" data-price="${opt.price}">${opt.label} — ${formatPrice(opt.price)}</option>`
+        ).join('');
+        updateModalPriceFromSelect();
+        setTimeout(() => $('#redesLink').focus(), 300);
+    }
 
     $('#modalOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
-    setTimeout(() => {
-        if (type === 'streaming') $('#profileName').focus();
-        else $('#redesLink').focus();
-    }, 300);
+}
+
+function updateModalPriceFromSelect() {
+    const select = $('#redesCantidad');
+    const opt = select.options[select.selectedIndex];
+    if (!opt) return;
+    const price = parseFloat(opt.dataset.price);
+    $('#modalServicePrice').textContent = formatPrice(price);
 }
 
 function closeModal() {
@@ -162,20 +262,11 @@ function closeModal() {
 
 // ---------- CART ----------
 function addToCart(item) {
-    // For streaming: key by id+profileName. For redes: key by id+link.
-    const key = item.type === 'streaming' ? item.profileName : item.redesLink;
-    const existing = cart.find(c => c.id === item.id && (
-        (item.type === 'streaming' && c.profileName === item.profileName) ||
-        (item.type === 'redes' && c.redesLink === item.redesLink)
-    ));
-    if (existing) {
-        existing.qty += 1;
-    } else {
-        cart.push(item);
-    }
+    cart.push(item);
     saveCart();
     updateCartUI();
-    showToast(`${findProduct(item.id).name} agregado al carrito`);
+    const p = findProduct(item.id);
+    showToast(`${p.name} agregado al carrito`);
 }
 
 function removeFromCart(idx) {
@@ -194,12 +285,13 @@ function saveCart() {
     localStorage.setItem('vstg_cart', JSON.stringify(cart));
 }
 
-function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function truncateUrl(url, max = 50) {
+    if (url.length <= max) return url;
+    return url.slice(0, max - 3) + '...';
 }
 
 function updateCartUI() {
-    const count = cart.reduce((s, i) => s + i.qty, 0);
+    const count = cart.length;
     $('#cartCount').textContent = count;
     $('#cartBadge').textContent = count;
     $('#cartCount').classList.toggle('visible', count > 0);
@@ -219,7 +311,7 @@ function updateCartUI() {
         cartBody.innerHTML = cart.map((item, idx) => {
             const p = findProduct(item.id);
             if (!p) return '';
-            const subtotal = p.price * item.qty;
+            const subtotal = item.price;
             total += subtotal;
             let meta = '';
             if (item.type === 'streaming') {
@@ -228,7 +320,8 @@ function updateCartUI() {
                     <span class="cart-item-meta"><strong>PIN:</strong> ${escapeHtml(item.profilePin)}</span>`;
             } else {
                 meta = `
-                    <span class="cart-item-meta"><strong>Enlace:</strong> ${escapeHtml(truncateUrl(item.redesLink))}</span>
+                    <span class="cart-item-meta"><strong>Cantidad:</strong> ${item.qtyLabel}</span>
+                    <span class="cart-item-meta"><strong>Link:</strong> ${escapeHtml(truncateUrl(item.redesLink))}</span>
                     ${item.redesNote ? `<span class="cart-item-meta"><strong>Notas:</strong> ${escapeHtml(item.redesNote)}</span>` : ''}`;
             }
             return `
@@ -237,7 +330,6 @@ function updateCartUI() {
                     <div class="cart-item-info">
                         <span class="cart-item-name">${p.name}</span>
                         ${meta}
-                        <span class="cart-item-meta"><strong>Cant:</strong> ${item.qty}</span>
                     </div>
                     <div class="cart-item-price">${formatPrice(subtotal)}</div>
                     <button class="cart-item-remove" data-remove="${idx}">Eliminar</button>
@@ -246,15 +338,11 @@ function updateCartUI() {
         cartFooter.style.display = 'flex';
         $('#cartTotal').textContent = formatPrice(total);
 
+        // Bind remove buttons
         $$('[data-remove]').forEach(btn => {
             btn.addEventListener('click', () => removeFromCart(parseInt(btn.dataset.remove, 10)));
         });
     }
-}
-
-function truncateUrl(url) {
-    if (url.length <= 45) return url;
-    return url.slice(0, 42) + '...';
 }
 
 // ---------- CART DRAWER ----------
@@ -339,10 +427,14 @@ function animateCounters() {
 
 // ---------- PIN INPUT MASK ----------
 function bindPinInput() {
-    const pinInput = $('#profilePin');
-    pinInput.addEventListener('input', (e) => {
+    $('#profilePin').addEventListener('input', (e) => {
         e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
     });
+}
+
+// ---------- SELECT CHANGE ----------
+function bindCantidadSelect() {
+    $('#redesCantidad').addEventListener('change', updateModalPriceFromSelect);
 }
 
 // ---------- FORM SUBMIT ----------
@@ -363,20 +455,37 @@ function bindForm() {
             if (!/^\d{4}$/.test(pin)) { pinInput.classList.add('invalid'); valid = false; }
             else pinInput.classList.remove('invalid');
             if (!valid) { showToast('Revisa los datos ingresados'); return; }
-            addToCart({ id, type: 'streaming', qty: 1, profileName: name, profilePin: pin });
+
+            const p = findProduct(id);
+            addToCart({
+                id, type: 'streaming',
+                price: p.price,
+                profileName: name,
+                profilePin: pin
+            });
         } else {
+            const select = $('#redesCantidad');
+            const opt = select.options[select.selectedIndex];
             const linkInput = $('#redesLink');
             const link = linkInput.value.trim();
             const note = $('#redesNote').value.trim();
             let valid = true;
             if (!/^https?:\/\/.+\..+/.test(link)) { linkInput.classList.add('invalid'); valid = false; }
             else linkInput.classList.remove('invalid');
-            if (!valid) { showToast('Ingresa un enlace válido'); return; }
-            addToCart({ id, type: 'redes', qty: 1, redesLink: link, redesNote: note });
+            if (!valid) { showToast('Ingresa un enlace válido (http/https)'); return; }
+
+            addToCart({
+                id, type: 'redes',
+                qty: parseInt(opt.dataset.qty, 10),
+                qtyLabel: opt.label.split(' — ')[0],
+                price: parseFloat(opt.dataset.price),
+                redesLink: link,
+                redesNote: note
+            });
         }
 
         // Visual feedback on the product button
-        const prodBtn = document.querySelector(`[data-add="${id}"]`);
+        const prodBtn = document.querySelector(`[data-action="open-modal"][data-id="${id}"]`);
         if (prodBtn) {
             const originalText = prodBtn.textContent;
             prodBtn.classList.add('added');
@@ -392,38 +501,56 @@ function bindForm() {
 
 // ---------- WHATSAPP CHECKOUT ----------
 function buildWhatsAppMessage() {
-    let msg = '*VSTG.RTW — NUEVO PEDIDO*%0A%0A';
-    let total = 0;
-    let streamingCount = 0, redesCount = 0;
-    let streamingTotal = 0, redesTotal = 0;
+    const now = new Date();
+    const fecha = now.toLocaleString('es-PE', { timeZone: 'America/Lima' });
+    let msg = `*VSTG.RTW — NUEVO PEDIDO*%0A`;
+    msg += `Fecha: ${encodeURIComponent(fecha)}%0A`;
+    msg += `%0A`;
 
-    cart.forEach((item, idx) => {
+    let total = 0;
+    let streamingItems = [];
+    let redesItems = [];
+
+    cart.forEach((item) => {
         const p = findProduct(item.id);
         if (!p) return;
-        const subtotal = p.price * item.qty;
-        total += subtotal;
-        msg += `*${idx + 1}. ${p.name}*%0A`;
-        msg += `   Precio: ${formatPrice(p.price)}%0A`;
-        msg += `   Cantidad: ${item.qty}%0A`;
         if (item.type === 'streaming') {
-            streamingCount += item.qty;
-            streamingTotal += subtotal;
-            msg += `   Nombre del perfil: ${encodeURIComponent(item.profileName)}%0A`;
-            msg += `   PIN: ${encodeURIComponent(item.profilePin)}%0A`;
+            streamingItems.push({ p, item });
         } else {
-            redesCount += item.qty;
-            redesTotal += subtotal;
-            msg += `   Enlace: ${encodeURIComponent(item.redesLink)}%0A`;
-            if (item.redesNote) msg += `   Notas: ${encodeURIComponent(item.redesNote)}%0A`;
+            redesItems.push({ p, item });
         }
-        msg += `   Subtotal: ${formatPrice(subtotal)}%0A%0A`;
+        total += item.price;
     });
 
+    // Streaming section
+    if (streamingItems.length) {
+        msg += `*STREAMING*%0A`;
+        streamingItems.forEach(({ p, item }, i) => {
+            msg += `%0A${i + 1}. ${p.name}%0A`;
+            msg += `   Precio: ${formatPrice(item.price)}%0A`;
+            msg += `   Nombre del perfil: ${encodeURIComponent(item.profileName)}%0A`;
+            msg += `   PIN: ${encodeURIComponent(item.profilePin)}%0A`;
+        });
+        msg += `%0A`;
+    }
+
+    // Redes section
+    if (redesItems.length) {
+        msg += `*CRECE EN REDES*%0A`;
+        redesItems.forEach(({ p, item }, i) => {
+            msg += `%0A${i + 1}. ${p.name}%0A`;
+            msg += `   Cantidad: ${encodeURIComponent(item.qtyLabel)}%0A`;
+            msg += `   Precio: ${formatPrice(item.price)}%0A`;
+            msg += `   Link: ${encodeURIComponent(item.redesLink)}%0A`;
+            if (item.redesNote) msg += `   Notas: ${encodeURIComponent(item.redesNote)}%0A`;
+        });
+        msg += `%0A`;
+    }
+
     msg += `*TOTAL: ${formatPrice(total)}*%0A%0A`;
-    if (streamingCount) msg += `Streaming: ${streamingCount} item(s) — ${formatPrice(streamingTotal)}%0A`;
-    if (redesCount) msg += `Redes: ${redesCount} item(s) — ${formatPrice(redesTotal)}%0A`;
-    if (streamingCount || redesCount) msg += '%0A';
-    msg += 'Por favor confirmar el pedido y enviar los datos de pago. 🙌';
+    msg += `Por favor confirmar el pedido y enviar los datos de pago. 🙌%0A`;
+    msg += `_Mensaje generado automáticamente desde vstg.rtw_`;
+
     return msg;
 }
 
@@ -445,13 +572,14 @@ function bindCheckout() {
 document.addEventListener('DOMContentLoaded', () => {
     renderStreaming();
     renderRedes();
-    bindAddButtons();
+    bindAddButtons();          // Event delegation — must work for all dynamically injected buttons
     bindNavbarScroll();
     bindMobileMenu();
     bindReveal();
     animateCounters();
     bindCheckout();
     bindPinInput();
+    bindCantidadSelect();
     bindForm();
     updateCartUI();
 
