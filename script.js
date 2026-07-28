@@ -1,76 +1,57 @@
 /* ============================================================
    VSTG.RTW — Main Script
-   Cart, filters, animations, products data
+   Streaming catalog (PEN), profile modal, WhatsApp checkout
    ============================================================ */
 
+// ---------- CONFIG ----------
+const WHATSAPP_NUMBER = '519407799810'; // Perú +51 940 779 810
+const CURRENCY = 'S/';
+
 // ---------- PRODUCT DATA ----------
-const PRODUCTS = {
-    streaming: [
-        { id: 'st1', name: 'Netflix Premium 4K', cat: 'peliculas', icon: 'N', desc: 'Cuenta compartida con perfiles privados. Calidad 4K Ultra HD.', price: 8.99, oldPrice: 15.99, features: ['Pantalla 4K UHD', '4 perfiles privados', 'Garantía 30 días', 'Entrega inmediata'] },
-        { id: 'st2', name: 'Disney+ Estándar', cat: 'peliculas', icon: 'D', desc: 'Acceso completo a Marvel, Star Wars, Pixar y más.', price: 5.99, oldPrice: 9.99, features: ['1080p Full HD', '2 pantallas simultáneas', 'Descargas ilimitadas', 'Garantía 30 días'] },
-        { id: 'st3', name: 'Spotify Premium', cat: 'musica', icon: 'S', desc: 'Cuenta personal sin anuncios, descargas offline.', price: 4.99, oldPrice: 10.99, features: ['Sin anuncios', 'Descarga offline', 'Saltos ilimitados', 'Cuenta personal'] },
-        { id: 'st4', name: 'YouTube Premium', cat: 'musica', icon: 'Y', desc: 'Sin anuncios, reproducción en segundo plano y YouTube Music.', price: 6.99, oldPrice: 12.99, features: ['Sin anuncios', 'Background play', 'YouTube Music incluido', 'Descargas offline'] },
-        { id: 'st5', name: 'HBO Max', cat: 'peliculas', icon: 'H', desc: 'Estrenos de cine, series originales y clásicos.', price: 7.99, oldPrice: 14.99, features: ['4K disponible', '3 perfiles', 'Estrenos simultáneos', 'Garantía 30 días'] },
-        { id: 'st6', name: 'DAZN Sports', cat: 'deportes', icon: 'DZ', desc: 'Fútbol, boxeo, MMA y deportes en vivo en HD.', price: 9.99, oldPrice: 19.99, features: ['Deportes en vivo HD', 'Replays ilimitados', 'Multi-dispositivo', 'Sin contratos'] }
-    ],
-    redes: [
-        { id: 'rd1', name: 'Instagram — 5K Seguidores', cat: 'instagram', icon: 'IG', desc: 'Seguidores reales y orgánicos, entrega gradual en 7 días.', price: 24.99, oldPrice: 39.99, features: ['Seguidores reales', 'Entrega gradual 7 días', 'Sin contraseña', 'Garantía reposición'] },
-        { id: 'rd2', name: 'Instagram — Gestión Mensual', cat: 'instagram', icon: 'IG', desc: 'Gestión completa: contenido, hashtags y engagement.', price: 79.99, features: ['8 post al mes', 'Análisis mensual', 'Estrategia personalizada', 'Soporte directo'] },
-        { id: 'rd3', name: 'TikTok — 10K Seguidores', cat: 'tiktok', icon: 'TK', desc: 'Crecimiento real con engagement activo y reach orgánico.', price: 34.99, oldPrice: 59.99, features: ['Seguidores reales', 'Entrega 5 días', 'Sin riesgo de baneo', 'Garantía 30 días'] },
-        { id: 'rd4', name: 'TikTok — Paquete Viral', cat: 'tiktok', icon: 'TK', desc: '50K views + 5K likes + 1K seguidores en 3 videos.', price: 49.99, features: ['50K views garantizadas', '5K likes', '1K seguidores', 'Análisis de rendimiento'] },
-        { id: 'rd5', name: 'YouTube — 1K Suscriptores', cat: 'youtube', icon: 'YT', desc: 'Cumple el requisito de monetización con suscriptores reales.', price: 44.99, oldPrice: 89.99, features: ['Suscriptores reales', 'Cumple monetización', 'Entrega 14 días', 'Garantía reposición'] },
-        { id: 'rd6', name: 'YouTube — 100K Views', cat: 'youtube', icon: 'YT', desc: 'Views orgánicos distribuidos en cualquier video.', price: 39.99, features: ['100K views', 'Retención 60%+', 'Geo-targeting disponible', 'Entrega 7 días'] }
-    ],
-    edicion: [
-        { id: 'ed1', name: 'Edición de Video — 5 min', cat: 'video', icon: 'PR', desc: 'Edición profesional en Premiere Pro con transiciones y color.', price: 49.99, features: ['Hasta 5 minutos', 'Color grading', 'Musicalización', '2 revisiones gratis'] },
-        { id: 'ed2', name: 'Edición de Video — Corto', cat: 'video', icon: 'PR', desc: 'Video corto vertical para Reels, TikTok o Shorts.', price: 19.99, features: ['Video vertical 9:16', 'Hasta 60 segundos', 'Subtítulos animados', '1 revisión gratis'] },
-        { id: 'ed3', name: 'Edición de Foto — Lote 10', cat: 'foto', icon: 'PS', desc: 'Retoque profesional de 10 fotos con Lightroom y Photoshop.', price: 29.99, features: ['10 fotos editadas', 'Color grading', 'Retoque de piel', 'Entrega 48h'] },
-        { id: 'ed4', name: 'Foto Producto — Pack 20', cat: 'foto', icon: 'PS', desc: 'Fotos de producto profesionales para ecommerce.', price: 89.99, features: ['20 fotos editadas', 'Fondo blanco', 'Ángulos múltiples', 'Uso comercial'] },
-        { id: 'ed5', name: 'Diseño de Logo', cat: 'diseno', icon: 'AI', desc: 'Logo profesional vectorial con 4 conceptos iniciales.', price: 59.99, features: ['4 conceptos', 'Archivos AI/PNG/SVG', '3 revisiones', 'Manual de marca básico'] },
-        { id: 'ed6', name: 'Diseño Redes — Pack Mensual', cat: 'diseno', icon: 'AI', desc: '15 plantillas para Instagram, historias y reels.', price: 99.99, features: ['15 plantillas', 'Plantilla editable', 'Coherencia visual', 'Soporte directo'] }
-    ]
-};
+const PRODUCTS = [
+    { id: 'nf',     name: 'Netflix Premium',       icon: 'NF', desc: 'Cuenta compartida con perfil privado. Calidad 4K Ultra HD, hasta 4 dispositivos simultáneos.', price: 12, features: ['Calidad 4K UHD + HDR', 'Perfil privado propio', 'Garantía 30 días', 'Activación inmediata'] },
+    { id: 'pv',     name: 'Prime Video',           icon: 'PV', desc: 'Acceso completo a Amazon Prime Video: películas, series originales y exclusivas.', price: 8,  features: ['Catálogo completo Prime', 'Perfil privado', 'Garantía 30 días', 'Activación inmediata'] },
+    { id: 'hb',     name: 'HBO Max',               icon: 'HB', desc: 'Estrenos de cine, series originales HBO, Warner y DC en un solo lugar.', price: 8,  features: ['Estrenos simultáneos cine', 'Perfil privado', 'Garantía 30 días', 'Activación inmediata'] },
+    { id: 'ds',     name: 'Disney Premium',        icon: 'DS', desc: 'Disney+, Marvel, Star Wars, Pixar y Star. Calidad 4K con perfil premium.', price: 15, features: ['Calidad 4K UHD', '4 pantallas simultáneas', 'Incluye Star contenido', 'Garantía 30 días'] },
+    { id: 'cr',     name: 'Crunchyroll Mega Fan',  icon: 'CR', desc: 'Anime sin anuncios, simulcast con Japón y descargas offline en HD.', price: 8,  features: ['Sin anuncios', 'Simulcast Japón', 'Descargas offline', 'Acceso manga'] },
+    { id: 'sp',     name: 'Spotify Premium',       icon: 'SP', desc: 'Cuenta personal sin anuncios, descargas offline y saltos ilimitados.', price: 15, features: ['Cuenta personal', 'Sin anuncios', 'Descarga offline', 'Saltos ilimitados'] },
+    { id: 'am',     name: 'Apple Music',           icon: 'AM', desc: 'Más de 100 millones de canciones, descargas offline y audio sin pérdida.', price: 15, features: ['Cuenta personal', 'Audio sin pérdida', 'Descargas offline', 'Letras en tiempo real'] }
+];
 
 // ---------- CART STATE ----------
 let cart = JSON.parse(localStorage.getItem('vstg_cart') || '[]');
+let pendingProductId = null;
 
 // ---------- DOM HELPERS ----------
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
+const formatPrice = (n) => `${CURRENCY} ${Number(n).toFixed(2)}`;
+
 // ---------- LOADER ----------
 window.addEventListener('load', () => {
-    setTimeout(() => {
-        $('#loader').classList.add('hidden');
-    }, 600);
+    setTimeout(() => $('#loader').classList.add('hidden'), 600);
 });
 
 // ---------- RENDER PRODUCTS ----------
 function renderProducts() {
-    Object.keys(PRODUCTS).forEach(category => {
-        const grid = $(`#${category}Grid`);
-        if (!grid) return;
-        grid.innerHTML = PRODUCTS[category].map(p => `
-            <article class="product-card" data-cat="${p.cat}" data-id="${p.id}">
-                <span class="product-tag">${p.cat}</span>
-                <div class="product-icon">${p.icon}</div>
-                <h3 class="product-name">${p.name}</h3>
-                <p class="product-desc">${p.desc}</p>
-                <ul class="product-features">
-                    ${p.features.map(f => `<li>${f}</li>`).join('')}
-                </ul>
-                <div class="product-footer">
-                    <div class="product-price">
-                        ${p.oldPrice ? `<span class="product-price-old">$${p.oldPrice.toFixed(2)}</span>` : ''}
-                        $${p.price.toFixed(2)}
-                    </div>
-                    <button class="add-cart-btn" data-add="${p.id}">
-                        AGREGAR
-                    </button>
-                </div>
-            </article>
-        `).join('');
-    });
+    const grid = $('#streamingGrid');
+    if (!grid) return;
+    grid.innerHTML = PRODUCTS.map(p => `
+        <article class="product-card" data-id="${p.id}">
+            <span class="product-tag">PERFIL</span>
+            <div class="product-icon">${p.icon}</div>
+            <h3 class="product-name">${p.name}</h3>
+            <p class="product-desc">${p.desc}</p>
+            <ul class="product-features">
+                ${p.features.map(f => `<li>${f}</li>`).join('')}
+            </ul>
+            <div class="product-footer">
+                <div class="product-price">${formatPrice(p.price)}</div>
+                <button class="add-cart-btn" data-add="${p.id}">ALQUILAR</button>
+            </div>
+        </article>
+    `).join('');
     bindAddButtons();
 }
 
@@ -78,42 +59,55 @@ function bindAddButtons() {
     $$('[data-add]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const id = btn.dataset.add;
-            addToCart(id);
-            btn.classList.add('added');
-            btn.textContent = '✓ AGREGADO';
-            setTimeout(() => {
-                btn.classList.remove('added');
-                btn.textContent = 'AGREGAR';
-            }, 1500);
+            openProfileModal(btn.dataset.add);
         });
     });
 }
 
 // ---------- FIND PRODUCT ----------
 function findProduct(id) {
-    for (const cat of Object.values(PRODUCTS)) {
-        const p = cat.find(p => p.id === id);
-        if (p) return p;
-    }
-    return null;
+    return PRODUCTS.find(p => p.id === id);
+}
+
+// ---------- PROFILE MODAL ----------
+function openProfileModal(id) {
+    const p = findProduct(id);
+    if (!p) return;
+    pendingProductId = id;
+    $('#modalServiceName').textContent = p.name;
+    $('#modalServiceDesc').textContent = p.desc;
+    $('#modalServicePrice').textContent = formatPrice(p.price);
+    $('#profileName').value = '';
+    $('#profilePin').value = '';
+    $('#profileName').classList.remove('invalid');
+    $('#profilePin').classList.remove('invalid');
+    $('#modalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => $('#profileName').focus(), 300);
+}
+
+function closeProfileModal() {
+    $('#modalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    pendingProductId = null;
 }
 
 // ---------- CART ----------
-function addToCart(id) {
-    const existing = cart.find(item => item.id === id);
+function addToCart(id, profileName, profilePin) {
+    // Each unique combination (product + profile name) is a separate line item
+    const existing = cart.find(item => item.id === id && item.profileName === profileName);
     if (existing) {
         existing.qty += 1;
     } else {
-        cart.push({ id, qty: 1 });
+        cart.push({ id, qty: 1, profileName, profilePin });
     }
     saveCart();
     updateCartUI();
-    showToast('Producto agregado al carrito');
+    showToast(`${findProduct(id).name} agregado al carrito`);
 }
 
-function removeFromCart(id) {
-    cart = cart.filter(item => item.id !== id);
+function removeFromCart(idx) {
+    cart.splice(idx, 1);
     saveCart();
     updateCartUI();
 }
@@ -130,17 +124,15 @@ function saveCart() {
 
 function updateCartUI() {
     const count = cart.reduce((s, i) => s + i.qty, 0);
-    const cartCount = $('#cartCount');
-    const cartBadge = $('#cartBadge');
-    cartCount.textContent = count;
-    cartBadge.textContent = count;
-    cartCount.classList.toggle('visible', count > 0);
+    $('#cartCount').textContent = count;
+    $('#cartBadge').textContent = count;
+    $('#cartCount').classList.toggle('visible', count > 0);
 
     const cartBody = $('#cartBody');
     const cartFooter = $('#cartFooter');
     if (cart.length === 0) {
         cartBody.innerHTML = `
-            <div class="cart-empty" id="cartEmpty">
+            <div class="cart-empty">
                 <div class="cart-empty-icon">▣</div>
                 <p>Tu carrito está vacío</p>
                 <span>Agrega servicios para continuar</span>
@@ -148,28 +140,35 @@ function updateCartUI() {
         cartFooter.style.display = 'none';
     } else {
         let total = 0;
-        cartBody.innerHTML = cart.map(item => {
+        cartBody.innerHTML = cart.map((item, idx) => {
             const p = findProduct(item.id);
             if (!p) return '';
-            total += p.price * item.qty;
+            const subtotal = p.price * item.qty;
+            total += subtotal;
             return `
                 <div class="cart-item">
                     <div class="cart-item-icon">${p.icon}</div>
                     <div class="cart-item-info">
                         <span class="cart-item-name">${p.name}</span>
-                        <span class="cart-item-cat">Cant: ${item.qty}</span>
+                        <span class="cart-item-meta"><strong>Perfil:</strong> ${escapeHtml(item.profileName)}</span>
+                        <span class="cart-item-meta"><strong>PIN:</strong> ${escapeHtml(item.profilePin)}</span>
+                        <span class="cart-item-meta"><strong>Cant:</strong> ${item.qty}</span>
                     </div>
-                    <div class="cart-item-price">$${(p.price * item.qty).toFixed(2)}</div>
-                    <button class="cart-item-remove" data-remove="${p.id}">Eliminar</button>
+                    <div class="cart-item-price">${formatPrice(subtotal)}</div>
+                    <button class="cart-item-remove" data-remove="${idx}">Eliminar</button>
                 </div>`;
         }).join('');
         cartFooter.style.display = 'flex';
-        $('#cartTotal').textContent = `$${total.toFixed(2)}`;
+        $('#cartTotal').textContent = formatPrice(total);
 
         $$('[data-remove]').forEach(btn => {
-            btn.addEventListener('click', () => removeFromCart(btn.dataset.remove));
+            btn.addEventListener('click', () => removeFromCart(parseInt(btn.dataset.remove, 10)));
         });
     }
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 // ---------- CART DRAWER ----------
@@ -191,25 +190,7 @@ function showToast(msg) {
     toast.textContent = msg;
     toast.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
-}
-
-// ---------- FILTERS ----------
-function bindFilters() {
-    $$('.filters').forEach(filterGroup => {
-        const grid = filterGroup.parentElement.querySelector('.products-grid');
-        filterGroup.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterGroup.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const filter = btn.dataset.filter;
-                grid.querySelectorAll('.product-card').forEach(card => {
-                    const show = filter === 'all' || card.dataset.cat === filter;
-                    card.classList.toggle('hidden', !show);
-                });
-            });
-        });
-    });
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
 }
 
 // ---------- NAVBAR SCROLL ----------
@@ -240,9 +221,7 @@ function bindMobileMenu() {
 function bindReveal() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
+            if (entry.isIntersecting) entry.target.classList.add('visible');
         });
     }, { threshold: 0.15 });
     $$('.reveal').forEach(el => observer.observe(el));
@@ -255,14 +234,13 @@ function animateCounters() {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const el = entry.target;
-                const target = parseInt(el.dataset.target);
+                const target = parseInt(el.dataset.target, 10);
                 const duration = 2000;
                 const start = performance.now();
                 const step = (now) => {
                     const progress = Math.min((now - start) / duration, 1);
                     const eased = 1 - Math.pow(1 - progress, 3);
-                    const value = Math.floor(eased * target);
-                    el.textContent = value.toLocaleString();
+                    el.textContent = Math.floor(eased * target).toLocaleString();
                     if (progress < 1) requestAnimationFrame(step);
                 };
                 requestAnimationFrame(step);
@@ -273,36 +251,117 @@ function animateCounters() {
     counters.forEach(c => observer.observe(c));
 }
 
-// ---------- CHECKOUT ----------
-function bindCheckout() {
-    $('#checkoutBtn').addEventListener('click', () => {
-        if (cart.length === 0) return;
-        showToast('Redirigiendo a checkout... (demo)');
-        // Aquí se integraría Stripe / PayPal / MercadoPago
-        setTimeout(() => {
-            alert('Gracias por tu compra en VSTG.RTW!\n\nEste es un demo. En producción se integraría una pasarela de pago real.');
-        }, 800);
+// ---------- PIN INPUT MASK ----------
+function bindPinInput() {
+    const pinInput = $('#profilePin');
+    pinInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
     });
+}
+
+// ---------- PROFILE FORM SUBMIT ----------
+function bindProfileForm() {
+    $('#profileForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!pendingProductId) return;
+        const nameInput = $('#profileName');
+        const pinInput = $('#profilePin');
+        const name = nameInput.value.trim();
+        const pin = pinInput.value.trim();
+        let valid = true;
+
+        if (name.length < 2 || name.length > 20) {
+            nameInput.classList.add('invalid');
+            valid = false;
+        } else {
+            nameInput.classList.remove('invalid');
+        }
+        if (!/^\d{4}$/.test(pin)) {
+            pinInput.classList.add('invalid');
+            valid = false;
+        } else {
+            pinInput.classList.remove('invalid');
+        }
+        if (!valid) {
+            showToast('Revisa los datos ingresados');
+            return;
+        }
+        addToCart(pendingProductId, name, pin);
+        // Visual feedback on the product button
+        const prodBtn = document.querySelector(`[data-add="${pendingProductId}"]`);
+        if (prodBtn) {
+            const originalText = prodBtn.textContent;
+            prodBtn.classList.add('added');
+            prodBtn.textContent = '✓ AGREGADO';
+            setTimeout(() => {
+                prodBtn.classList.remove('added');
+                prodBtn.textContent = originalText;
+            }, 1500);
+        }
+        closeProfileModal();
+    });
+}
+
+// ---------- WHATSAPP CHECKOUT ----------
+function buildWhatsAppMessage() {
+    let msg = '*VSTG.RTW — NUEVO PEDIDO*%0A%0A';
+    let total = 0;
+    cart.forEach((item, idx) => {
+        const p = findProduct(item.id);
+        if (!p) return;
+        const subtotal = p.price * item.qty;
+        total += subtotal;
+        msg += `*${idx + 1}. ${p.name}*%0A`;
+        msg += `   Precio: ${formatPrice(p.price)}%0A`;
+        msg += `   Cantidad: ${item.qty}%0A`;
+        msg += `   Nombre del perfil: ${encodeURIComponent(item.profileName)}%0A`;
+        msg += `   PIN: ${encodeURIComponent(item.profilePin)}%0A`;
+        msg += `   Subtotal: ${formatPrice(subtotal)}%0A%0A`;
+    });
+    msg += `*TOTAL: ${formatPrice(total)}*%0A%0A`;
+    msg += 'Por favor confirmar el pedido y enviar los datos de pago. 🙌';
+    return msg;
+}
+
+function sendWhatsAppOrder() {
+    if (cart.length === 0) return;
+    const message = buildWhatsAppMessage();
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+    window.open(url, '_blank');
+    showToast('Abriendo WhatsApp...');
+}
+
+// ---------- BIND CHECKOUT ----------
+function bindCheckout() {
+    $('#checkoutBtn').addEventListener('click', sendWhatsAppOrder);
     $('#clearCartBtn').addEventListener('click', clearCart);
 }
 
 // ---------- INIT ----------
 document.addEventListener('DOMContentLoaded', () => {
     renderProducts();
-    bindFilters();
     bindNavbarScroll();
     bindMobileMenu();
     bindReveal();
     animateCounters();
     bindCheckout();
+    bindPinInput();
+    bindProfileForm();
     updateCartUI();
 
     $('#cartBtn').addEventListener('click', openCart);
     $('#cartClose').addEventListener('click', closeCart);
     $('#cartOverlay').addEventListener('click', closeCart);
+    $('#modalClose').addEventListener('click', closeProfileModal);
+    $('#modalOverlay').addEventListener('click', (e) => {
+        if (e.target === $('#modalOverlay')) closeProfileModal();
+    });
 
-    // ESC to close cart
+    // ESC closes any overlay
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeCart();
+        if (e.key === 'Escape') {
+            closeCart();
+            closeProfileModal();
+        }
     });
 });
