@@ -707,6 +707,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Spotlight effect on product cards (mouse-follow radial gradient)
+    document.body.addEventListener('mousemove', (e) => {
+        const card = e.target.closest('.product-card');
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        card.style.setProperty('--mx', x + '%');
+        card.style.setProperty('--my', y + '%');
+    });
+
+    // Smooth scroll for in-page anchors (improves UX fluidity)
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href === '#' || href.length < 2) return;
+            const target = document.querySelector(href);
+            if (!target) return;
+            e.preventDefault();
+            const top = target.getBoundingClientRect().top + window.pageYOffset - 60;
+            window.scrollTo({ top, behavior: 'smooth' });
+        });
+    });
+
     // Initial UI render
     updateCartUI();
 });
