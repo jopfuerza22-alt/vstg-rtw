@@ -55,16 +55,17 @@
             <div class="noise"></div>
         </div>
         <div class="hero-content">
-            <div class="hero-tag reveal">— STREAMING + CRECIMIENTO SOCIAL</div>
+            <div class="hero-tag reveal">— VSTG.RTW</div>
             <h1 class="hero-title reveal">
-                <span class="line">TU PERFIL</span>
-                <span class="line">PREMIUM</span>
-                <span class="line outline">A UN</span>
-                <span class="line">CLICK</span>
+                <span class="line">STREAMING</span>
+                <span class="line">AL INSTANTE.</span>
+                <span class="line outline">RESPALDO</span>
+                <span class="line">TOTAL.</span>
             </h1>
             <p class="hero-sub reveal">
-                Alquila perfiles de streaming con activación inmediata y haz crecer tus
-                redes con servicios reales para Instagram, Facebook y TikTok.
+                Alquila perfiles premium con activación inmediata. Olvídate de los malos ratos
+                y las cuentas caídas: contamos con la mejor estabilidad del mercado y garantía
+                estricta de reposición. Soporte real para que nunca te quedes a medias.
             </p>
             <div class="hero-cta reveal">
                 <a href="#streaming" class="btn btn-primary">VER STREAMING</a>
@@ -129,6 +130,7 @@
             <p class="section-desc">
                 Impulsa tu presencia en Instagram, Facebook y TikTok con servicios reales y
                 estables. Seguidores, likes, comentarios y vistas para escalar tu marca digital.
+                Selecciona la cantidad y pega el link de tu cuenta o publicación.
             </p>
         </div>
 
@@ -188,7 +190,7 @@
             <div class="step">
                 <span class="step-num">02</span>
                 <h3>CONFIGURA</h3>
-                <p>Para streaming: nombre del perfil y PIN. Para redes: enlace de tu cuenta o publicación.</p>
+                <p>Para streaming: nombre del perfil y PIN. Para redes: cantidad y link de tu cuenta o publicación.</p>
             </div>
             <div class="step">
                 <span class="step-num">03</span>
@@ -349,7 +351,7 @@
                 <p class="modal-service-price" id="modalServicePrice">S/ 12.00</p>
             </div>
             <form id="profileForm" class="modal-form" novalidate>
-                <!-- Campos dinámicos: para streaming = nombre perfil + PIN; para redes = enlace + cantidad -->
+                <!-- Campos para STREAMING -->
                 <div id="formFieldsStreaming">
                     <div class="form-group">
                         <label for="profileName">Nombre del perfil</label>
@@ -362,15 +364,23 @@
                         <span class="form-hint">PIN de seguridad para bloquear tu perfil</span>
                     </div>
                 </div>
+                <!-- Campos para REDES -->
                 <div id="formFieldsRedes" style="display:none;">
                     <div class="form-group">
-                        <label for="redesLink">Enlace de tu cuenta o publicación</label>
+                        <label for="redesCantidad">Cantidad</label>
+                        <select id="redesCantidad" name="redesCantidad" required>
+                            <!-- Opciones se inyectan desde JS según el producto -->
+                        </select>
+                        <span class="form-hint">Selecciona la cantidad que deseas contratar</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="redesLink">Link de tu cuenta o publicación</label>
                         <input type="url" id="redesLink" name="redesLink" required placeholder="https://instagram.com/tu_cuenta" autocomplete="off">
-                        <span class="form-hint">Pega la URL del perfil o post donde aplicar el servicio</span>
+                        <span class="form-hint">Para seguidores: link del perfil. Para likes/comentarios/vistas: link del post, reel o historia.</span>
                     </div>
                     <div class="form-group">
                         <label for="redesNote">Notas (opcional)</label>
-                        <textarea id="redesNote" name="redesNote" rows="2" placeholder="Indica si quieres reparto gradual, comentario personalizado, etc."></textarea>
+                        <textarea id="redesNote" name="redesNote" rows="2" placeholder="Ej: reparto gradual, comentario personalizado, etc."></textarea>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">AGREGAR AL CARRITO</button>
