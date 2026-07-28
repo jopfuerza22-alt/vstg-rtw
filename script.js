@@ -1,13 +1,17 @@
 /* ============================================================
-   VSTG.RTW — Main Script (v3)
-   - Streaming: profile + PIN
-   - Redes: cantidad (selector) + link + notas
-   - WhatsApp checkout with full message
+   VSTG.RTW — Main Script (v4)
+   Fixes:
+   - Explicit binding of cart close, modal close, overlay clicks
+   - Free quantity input (1-50,000) with dynamic price calc
+   - Preset buttons for quick selection
+   - Robust cart with full WhatsApp message
    ============================================================ */
 
 // ---------- CONFIG ----------
 const WHATSAPP_NUMBER = '51940779810'; // Perú +51 940 779 810
 const CURRENCY = 'S/';
+const MIN_QTY = 1;
+const MAX_QTY = 50000;
 
 // ---------- STREAMING PRODUCTS ----------
 const STREAMING_PRODUCTS = [
@@ -21,101 +25,51 @@ const STREAMING_PRODUCTS = [
 ];
 
 // ---------- REDES PRODUCTS ----------
-// Each product has options: [{label, qty, price}] — user picks from select
+// Each has pricePerUnit — total = qty * pricePerUnit (with tier discounts)
+// tiers: array of {min, multiplier} for volume discounts (optional)
 const REDES_PRODUCTS = {
     seguidores: [
         { id: 'sg-ig', name: 'Seguidores Instagram', icon: 'IG', desc: 'Seguidores reales y estables para tu cuenta de Instagram.', features: ['Seguidores reales', 'Entrega gradual', 'Sin contraseña', 'Garantía reposición 30 días'],
-          options: [
-            { label: '1,000 seguidores', qty: 1000, price: 12 },
-            { label: '5,000 seguidores', qty: 5000, price: 45 },
-            { label: '10,000 seguidores', qty: 10000, price: 80 }
-          ]
-        },
+          pricePerUnit: 0.012, minQty: 100, maxQty: 50000, step: 100 },
         { id: 'sg-fb', name: 'Seguidores Facebook',  icon: 'FB', desc: 'Impulsa tu página de Facebook con seguidores reales y activos.', features: ['Seguidores reales', 'Entrega gradual', 'Sin contraseña', 'Garantía reposición'],
-          options: [
-            { label: '1,000 seguidores', qty: 1000, price: 15 },
-            { label: '5,000 seguidores', qty: 5000, price: 55 },
-            { label: '10,000 seguidores', qty: 10000, price: 100 }
-          ]
-        },
+          pricePerUnit: 0.015, minQty: 100, maxQty: 50000, step: 100 },
         { id: 'sg-tk', name: 'Seguidores TikTok',    icon: 'TK', desc: 'Crece en TikTok con seguidores estables, sin riesgo de baneo.', features: ['Seguidores reales', 'Entrega gradual', 'Sin riesgo de baneo', 'Garantía 30 días'],
-          options: [
-            { label: '1,000 seguidores', qty: 1000, price: 10 },
-            { label: '5,000 seguidores', qty: 5000, price: 40 },
-            { label: '10,000 seguidores', qty: 10000, price: 70 }
-          ]
-        }
+          pricePerUnit: 0.010, minQty: 100, maxQty: 50000, step: 100 }
     ],
     likes: [
         { id: 'lk-ig', name: 'Likes Instagram',  icon: 'IG', desc: 'Likes reales para tus publicaciones de Instagram, baja caída.', features: ['Likes reales', 'Reparto gradual', 'Baja caída', 'Garantía 30 días'],
-          options: [
-            { label: '1,000 likes', qty: 1000, price: 8 },
-            { label: '5,000 likes', qty: 5000, price: 30 },
-            { label: '10,000 likes', qty: 10000, price: 50 }
-          ]
-        },
+          pricePerUnit: 0.008, minQty: 50, maxQty: 50000, step: 50 },
         { id: 'lk-fb', name: 'Likes Facebook',   icon: 'FB', desc: 'Likes para tus publicaciones o página de Facebook.', features: ['Likes reales', 'Reparto gradual', 'Estables', 'Garantía reposición'],
-          options: [
-            { label: '1,000 likes', qty: 1000, price: 10 },
-            { label: '5,000 likes', qty: 5000, price: 38 },
-            { label: '10,000 likes', qty: 10000, price: 65 }
-          ]
-        },
+          pricePerUnit: 0.010, minQty: 50, maxQty: 50000, step: 50 },
         { id: 'lk-tk', name: 'Likes TikTok',     icon: 'TK', desc: 'Likes para tus videos de TikTok y mayor viralidad.', features: ['Likes reales', 'Reparto gradual', 'Sin riesgo de baneo', 'Garantía 30 días'],
-          options: [
-            { label: '1,000 likes', qty: 1000, price: 6 },
-            { label: '5,000 likes', qty: 5000, price: 22 },
-            { label: '10,000 likes', qty: 10000, price: 40 }
-          ]
-        }
+          pricePerUnit: 0.006, minQty: 50, maxQty: 50000, step: 50 }
     ],
     comentarios: [
         { id: 'cm-ig', name: 'Comentarios Instagram', icon: 'IG', desc: 'Comentarios reales y personalizados para tu publicación de Instagram.', features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 1-2 días'],
-          options: [
-            { label: '100 comentarios', qty: 100, price: 12 },
-            { label: '500 comentarios', qty: 500, price: 50 },
-            { label: '1,000 comentarios', qty: 1000, price: 90 }
-          ]
-        },
+          pricePerUnit: 0.12, minQty: 10, maxQty: 5000, step: 10 },
         { id: 'cm-fb', name: 'Comentarios Facebook',  icon: 'FB', desc: 'Comentarios reales para tus publicaciones de Facebook.', features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 1-2 días'],
-          options: [
-            { label: '100 comentarios', qty: 100, price: 14 },
-            { label: '500 comentarios', qty: 500, price: 58 },
-            { label: '1,000 comentarios', qty: 1000, price: 100 }
-          ]
-        },
+          pricePerUnit: 0.14, minQty: 10, maxQty: 5000, step: 10 },
         { id: 'cm-tk', name: 'Comentarios TikTok',    icon: 'TK', desc: 'Comentarios reales para tus videos de TikTok.', features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 1-2 días'],
-          options: [
-            { label: '100 comentarios', qty: 100, price: 10 },
-            { label: '500 comentarios', qty: 500, price: 45 },
-            { label: '1,000 comentarios', qty: 1000, price: 80 }
-          ]
-        }
+          pricePerUnit: 0.10, minQty: 10, maxQty: 5000, step: 10 }
     ],
     vistas: [
         { id: 'vs-ig', name: 'Vistas Instagram', icon: 'IG', desc: 'Vistas reales para tus Reels o videos de Instagram.', features: ['Vistas reales', 'Entrega rápida', 'Estables', 'Sin contraseña'],
-          options: [
-            { label: '10,000 vistas', qty: 10000, price: 8 },
-            { label: '50,000 vistas', qty: 50000, price: 28 },
-            { label: '100,000 vistas', qty: 100000, price: 50 }
-          ]
-        },
+          pricePerUnit: 0.0008, minQty: 1000, maxQty: 500000, step: 1000 },
         { id: 'vs-fb', name: 'Vistas Facebook',  icon: 'FB', desc: 'Vistas para tus videos publicados en Facebook.', features: ['Vistas reales', 'Entrega gradual', 'Estables', 'Sin contraseña'],
-          options: [
-            { label: '10,000 vistas', qty: 10000, price: 10 },
-            { label: '50,000 vistas', qty: 50000, price: 32 },
-            { label: '100,000 vistas', qty: 100000, price: 55 }
-          ]
-        },
+          pricePerUnit: 0.001, minQty: 1000, maxQty: 500000, step: 1000 },
         { id: 'vs-tk', name: 'Vistas TikTok',    icon: 'TK', desc: 'Vistas reales para tus videos de TikTok, empuja al For You.', features: ['Vistas reales', 'Entrega gradual', 'Sin riesgo de baneo', 'Sin contraseña'],
-          options: [
-            { label: '10,000 vistas', qty: 10000, price: 5 },
-            { label: '50,000 vistas', qty: 50000, price: 18 },
-            { label: '100,000 vistas', qty: 100000, price: 30 }
-          ]
-        }
+          pricePerUnit: 0.0005, minQty: 1000, maxQty: 500000, step: 1000 }
     ]
 };
+
+// Volume discount tiers — apply multiplier based on quantity
+const TIERS = [
+    { min: 0,     multiplier: 1.0 },
+    { min: 1000,  multiplier: 0.95 },  // 5% off
+    { min: 5000,  multiplier: 0.90 },  // 10% off
+    { min: 10000, multiplier: 0.85 },  // 15% off
+    { min: 25000, multiplier: 0.80 }   // 20% off
+];
 
 // Flat list of all products for lookup
 const ALL_PRODUCTS = [
@@ -125,13 +79,28 @@ const ALL_PRODUCTS = [
 
 // ---------- CART STATE ----------
 let cart = JSON.parse(localStorage.getItem('vstg_cart') || '[]');
-let pendingProduct = null; // { id, type }
+let pendingProduct = null;
 
 // ---------- DOM HELPERS ----------
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 const formatPrice = (n) => `${CURRENCY} ${Number(n).toFixed(2)}`;
 const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const formatQty = (n) => Number(n).toLocaleString('es-PE');
+
+// ---------- PRICE CALCULATION ----------
+function calcRedesPrice(product, qty) {
+    const tier = [...TIERS].reverse().find(t => qty >= t.min) || TIERS[0];
+    return qty * product.pricePerUnit * tier.multiplier;
+}
+
+function getTierLabel(qty) {
+    const tier = [...TIERS].reverse().find(t => qty >= t.min) || TIERS[0];
+    if (tier.multiplier < 1) {
+        return `${Math.round((1 - tier.multiplier) * 100)}% OFF aplicado`;
+    }
+    return '';
+}
 
 // ---------- LOADER ----------
 window.addEventListener('load', () => {
@@ -165,15 +134,15 @@ function streamingCardHTML(p) {
             </ul>
             <div class="product-footer">
                 <div class="product-price">${formatPrice(p.price)}</div>
-                <button class="add-cart-btn" data-action="open-modal" data-id="${p.id}" data-type="streaming">ALQUILAR</button>
+                <button class="add-cart-btn" data-action="open-modal" data-id="${p.id}" data-type="streaming" type="button">ALQUILAR</button>
             </div>
         </article>
     `;
 }
 
 function redesCardHTML(p) {
-    // Show starting price (cheapest option)
-    const startingPrice = Math.min(...p.options.map(o => o.price));
+    const sampleQty = p.minQty * 10;
+    const samplePrice = calcRedesPrice(p, sampleQty);
     return `
         <article class="product-card" data-id="${p.id}">
             <span class="product-tag">${p.icon}</span>
@@ -182,25 +151,15 @@ function redesCardHTML(p) {
             <p class="product-desc">${p.desc}</p>
             <ul class="product-features">
                 ${p.features.map(f => `<li>${f}</li>`).join('')}
+                <li>Cantidad: ${formatQty(p.minQty)} a ${formatQty(p.maxQty)}</li>
+                <li>Descuentos por volumen</li>
             </ul>
             <div class="product-footer">
-                <div class="product-price">Desde ${formatPrice(startingPrice)}</div>
-                <button class="add-cart-btn" data-action="open-modal" data-id="${p.id}" data-type="redes">COMPRAR</button>
+                <div class="product-price">Desde ${formatPrice(p.pricePerUnit * p.minQty)}</div>
+                <button class="add-cart-btn" data-action="open-modal" data-id="${p.id}" data-type="redes" type="button">COMPRAR</button>
             </div>
         </article>
     `;
-}
-
-// ---------- BIND ALL "ALQUILAR/COMPRAR" BUTTONS ----------
-// Critical: use event delegation so it works on dynamically injected buttons
-function bindAddButtons() {
-    document.body.addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-action="open-modal"]');
-        if (!btn) return;
-        e.preventDefault();
-        e.stopPropagation();
-        openModal(btn.dataset.id, btn.dataset.type);
-    });
 }
 
 // ---------- FIND PRODUCT ----------
@@ -229,35 +188,86 @@ function openModal(id, type) {
         $('#formFieldsStreaming').style.display = 'block';
         $('#formFieldsRedes').style.display = 'none';
         $('#modalServicePrice').textContent = formatPrice(p.price);
-        setTimeout(() => $('#profileName').focus(), 300);
     } else {
         $('#formFieldsStreaming').style.display = 'none';
         $('#formFieldsRedes').style.display = 'block';
-        // Build the quantity select
-        const select = $('#redesCantidad');
-        select.innerHTML = p.options.map((opt, i) =>
-            `<option value="${i}" data-qty="${opt.qty}" data-price="${opt.price}">${opt.label} — ${formatPrice(opt.price)}</option>`
-        ).join('');
-        updateModalPriceFromSelect();
-        setTimeout(() => $('#redesLink').focus(), 300);
+        // Setup cantidad input
+        const input = $('#redesCantidad');
+        input.min = p.minQty;
+        input.max = p.maxQty;
+        input.step = p.step;
+        input.value = p.minQty * 10; // default 10x minimum
+        updateRedesPrice();
     }
 
     $('#modalOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
 }
 
-function updateModalPriceFromSelect() {
-    const select = $('#redesCantidad');
-    const opt = select.options[select.selectedIndex];
-    if (!opt) return;
-    const price = parseFloat(opt.dataset.price);
-    $('#modalServicePrice').textContent = formatPrice(price);
-}
-
 function closeModal() {
     $('#modalOverlay').classList.remove('open');
     document.body.style.overflow = '';
     pendingProduct = null;
+}
+
+// Update modal price based on selected quantity
+function updateRedesPrice() {
+    if (!pendingProduct || pendingProduct.type !== 'redes') return;
+    const p = findProduct(pendingProduct.id);
+    if (!p) return;
+    const input = $('#redesCantidad');
+    let qty = parseInt(input.value, 10);
+    if (isNaN(qty)) qty = p.minQty;
+    qty = Math.max(p.minQty, Math.min(p.maxQty, qty));
+    const price = calcRedesPrice(p, qty);
+    const tierLabel = getTierLabel(qty);
+    $('#modalServicePrice').textContent = formatPrice(price) + (tierLabel ? `  (${tierLabel})` : '');
+}
+
+// Validate and clamp quantity input
+function handleCantidadInput() {
+    if (!pendingProduct || pendingProduct.type !== 'redes') return;
+    const p = findProduct(pendingProduct.id);
+    if (!p) return;
+    const input = $('#redesCantidad');
+    let qty = parseInt(input.value, 10);
+    if (isNaN(qty) || qty < p.minQty) {
+        input.classList.add('invalid');
+    } else {
+        input.classList.remove('invalid');
+    }
+    // Clamp on blur
+    if (qty > p.maxQty) qty = p.maxQty;
+    if (qty < p.minQty && !isNaN(qty)) qty = p.minQty;
+    updateRedesPrice();
+}
+
+function handleCantidadBlur() {
+    if (!pendingProduct || pendingProduct.type !== 'redes') return;
+    const p = findProduct(pendingProduct.id);
+    if (!p) return;
+    const input = $('#redesCantidad');
+    let qty = parseInt(input.value, 10);
+    if (isNaN(qty) || qty < p.minQty) qty = p.minQty;
+    if (qty > p.maxQty) qty = p.maxQty;
+    input.value = qty;
+    input.classList.remove('invalid');
+    updateRedesPrice();
+    // Update active preset button
+    $$('.preset-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.preset, 10) === qty));
+}
+
+function bindPresetButtons() {
+    $$('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const val = parseInt(btn.dataset.preset, 10);
+            $('#redesCantidad').value = val;
+            $$('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            $('#redesCantidad').classList.remove('invalid');
+            updateRedesPrice();
+        });
+    });
 }
 
 // ---------- CART ----------
@@ -320,7 +330,7 @@ function updateCartUI() {
                     <span class="cart-item-meta"><strong>PIN:</strong> ${escapeHtml(item.profilePin)}</span>`;
             } else {
                 meta = `
-                    <span class="cart-item-meta"><strong>Cantidad:</strong> ${item.qtyLabel}</span>
+                    <span class="cart-item-meta"><strong>Cantidad:</strong> ${formatQty(item.qty)}</span>
                     <span class="cart-item-meta"><strong>Link:</strong> ${escapeHtml(truncateUrl(item.redesLink))}</span>
                     ${item.redesNote ? `<span class="cart-item-meta"><strong>Notas:</strong> ${escapeHtml(item.redesNote)}</span>` : ''}`;
             }
@@ -332,13 +342,13 @@ function updateCartUI() {
                         ${meta}
                     </div>
                     <div class="cart-item-price">${formatPrice(subtotal)}</div>
-                    <button class="cart-item-remove" data-remove="${idx}">Eliminar</button>
+                    <button class="cart-item-remove" data-remove="${idx}" type="button">Eliminar</button>
                 </div>`;
         }).join('');
         cartFooter.style.display = 'flex';
         $('#cartTotal').textContent = formatPrice(total);
 
-        // Bind remove buttons
+        // Bind remove buttons (fresh binding after each render)
         $$('[data-remove]').forEach(btn => {
             btn.addEventListener('click', () => removeFromCart(parseInt(btn.dataset.remove, 10)));
         });
@@ -432,11 +442,6 @@ function bindPinInput() {
     });
 }
 
-// ---------- SELECT CHANGE ----------
-function bindCantidadSelect() {
-    $('#redesCantidad').addEventListener('change', updateModalPriceFromSelect);
-}
-
 // ---------- FORM SUBMIT ----------
 function bindForm() {
     $('#profileForm').addEventListener('submit', (e) => {
@@ -464,21 +469,26 @@ function bindForm() {
                 profilePin: pin
             });
         } else {
-            const select = $('#redesCantidad');
-            const opt = select.options[select.selectedIndex];
+            const cantidadInput = $('#redesCantidad');
             const linkInput = $('#redesLink');
+            const p = findProduct(id);
+            let qty = parseInt(cantidadInput.value, 10);
             const link = linkInput.value.trim();
             const note = $('#redesNote').value.trim();
             let valid = true;
+            if (isNaN(qty) || qty < p.minQty) { cantidadInput.classList.add('invalid'); valid = false; }
+            else cantidadInput.classList.remove('invalid');
             if (!/^https?:\/\/.+\..+/.test(link)) { linkInput.classList.add('invalid'); valid = false; }
             else linkInput.classList.remove('invalid');
-            if (!valid) { showToast('Ingresa un enlace válido (http/https)'); return; }
+            if (!valid) { showToast('Revisa los datos ingresados'); return; }
+
+            // Clamp
+            if (qty > p.maxQty) qty = p.maxQty;
 
             addToCart({
                 id, type: 'redes',
-                qty: parseInt(opt.dataset.qty, 10),
-                qtyLabel: opt.label.split(' — ')[0],
-                price: parseFloat(opt.dataset.price),
+                qty,
+                price: calcRedesPrice(p, qty),
                 redesLink: link,
                 redesNote: note
             });
@@ -522,7 +532,6 @@ function buildWhatsAppMessage() {
         total += item.price;
     });
 
-    // Streaming section
     if (streamingItems.length) {
         msg += `*STREAMING*%0A`;
         streamingItems.forEach(({ p, item }, i) => {
@@ -534,12 +543,11 @@ function buildWhatsAppMessage() {
         msg += `%0A`;
     }
 
-    // Redes section
     if (redesItems.length) {
         msg += `*CRECE EN REDES*%0A`;
         redesItems.forEach(({ p, item }, i) => {
             msg += `%0A${i + 1}. ${p.name}%0A`;
-            msg += `   Cantidad: ${encodeURIComponent(item.qtyLabel)}%0A`;
+            msg += `   Cantidad: ${formatQty(item.qty)}%0A`;
             msg += `   Precio: ${formatPrice(item.price)}%0A`;
             msg += `   Link: ${encodeURIComponent(item.redesLink)}%0A`;
             if (item.redesNote) msg += `   Notas: ${encodeURIComponent(item.redesNote)}%0A`;
@@ -555,46 +563,71 @@ function buildWhatsAppMessage() {
 }
 
 function sendWhatsAppOrder() {
-    if (cart.length === 0) return;
+    if (cart.length === 0) {
+        showToast('Tu carrito está vacío');
+        return;
+    }
     const message = buildWhatsAppMessage();
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
     window.open(url, '_blank');
     showToast('Abriendo WhatsApp...');
 }
 
-// ---------- BIND CHECKOUT ----------
-function bindCheckout() {
-    $('#checkoutBtn').addEventListener('click', sendWhatsAppOrder);
-    $('#clearCartBtn').addEventListener('click', clearCart);
-}
-
 // ---------- INIT ----------
 document.addEventListener('DOMContentLoaded', () => {
+    // Render products
     renderStreaming();
     renderRedes();
-    bindAddButtons();          // Event delegation — must work for all dynamically injected buttons
+
+    // Bind all "ALQUILAR/COMPRAR" buttons (event delegation for robustness)
+    document.body.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action="open-modal"]');
+        if (!btn) return;
+        e.preventDefault();
+        openModal(btn.dataset.id, btn.dataset.type);
+    });
+
+    // Bind cart buttons — EXPLICIT, no delegation
+    $('#cartBtn').addEventListener('click', openCart);
+    $('#cartClose').addEventListener('click', closeCart);
+    $('#cartOverlay').addEventListener('click', closeCart);
+
+    // Bind modal close — EXPLICIT
+    $('#modalClose').addEventListener('click', closeModal);
+    $('#modalOverlay').addEventListener('click', (e) => {
+        // Only close if clicking the overlay itself (not the modal)
+        if (e.target === $('#modalOverlay')) closeModal();
+    });
+
+    // Bind checkout
+    $('#checkoutBtn').addEventListener('click', sendWhatsAppOrder);
+    $('#clearCartBtn').addEventListener('click', clearCart);
+
+    // Bind form
+    bindForm();
+
+    // Bind cantidad input
+    $('#redesCantidad').addEventListener('input', handleCantidadInput);
+    $('#redesCantidad').addEventListener('blur', handleCantidadBlur);
+
+    // Bind preset buttons (after first render — but they exist in HTML, so this works)
+    bindPresetButtons();
+
+    // Other UI bindings
     bindNavbarScroll();
     bindMobileMenu();
     bindReveal();
     animateCounters();
-    bindCheckout();
     bindPinInput();
-    bindCantidadSelect();
-    bindForm();
-    updateCartUI();
 
-    $('#cartBtn').addEventListener('click', openCart);
-    $('#cartClose').addEventListener('click', closeCart);
-    $('#cartOverlay').addEventListener('click', closeCart);
-    $('#modalClose').addEventListener('click', closeModal);
-    $('#modalOverlay').addEventListener('click', (e) => {
-        if (e.target === $('#modalOverlay')) closeModal();
-    });
-
+    // ESC closes everything
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeCart();
             closeModal();
         }
     });
+
+    // Initial UI render
+    updateCartUI();
 });
