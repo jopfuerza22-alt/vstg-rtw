@@ -1,17 +1,20 @@
 /* ============================================================
-   VSTG.RTW — Main Script (v4)
+   VSTG.RTW — Main Script (v5 — BULLETPROOF)
    Fixes:
-   - Explicit binding of cart close, modal close, overlay clicks
-   - Free quantity input (1-50,000) with dynamic price calc
-   - Preset buttons for quick selection
-   - Robust cart with full WhatsApp message
+   - New localStorage key to bypass stale data
+   - Cart validation/cleanup on load
+   - Submit button = type="button" + explicit click handler
+   - Auto-open cart after add (visual confirmation)
+   - Defensive rendering (always shows item even if product missing)
+   - Full error handling
    ============================================================ */
+
+'use strict';
 
 // ---------- CONFIG ----------
 const WHATSAPP_NUMBER = '51940779810'; // Perú +51 940 779 810
 const CURRENCY = 'S/';
-const MIN_QTY = 1;
-const MAX_QTY = 50000;
+const CART_KEY = 'vstg_cart_v5'; // bumped to invalidate stale data
 
 // ---------- STREAMING PRODUCTS ----------
 const STREAMING_PRODUCTS = [
@@ -25,8 +28,6 @@ const STREAMING_PRODUCTS = [
 ];
 
 // ---------- REDES PRODUCTS ----------
-// Each has pricePerUnit — total = qty * pricePerUnit (with tier discounts)
-// tiers: array of {min, multiplier} for volume discounts (optional)
 const REDES_PRODUCTS = {
     seguidores: [
         { id: 'sg-ig', name: 'Seguidores Instagram', icon: 'IG', desc: 'Seguidores reales y estables para tu cuenta de Instagram.', features: ['Seguidores reales', 'Entrega gradual', 'Sin contraseña', 'Garantía reposición 30 días'],
@@ -62,34 +63,46 @@ const REDES_PRODUCTS = {
     ]
 };
 
-// Volume discount tiers — apply multiplier based on quantity
+// Volume discount tiers
 const TIERS = [
     { min: 0,     multiplier: 1.0 },
-    { min: 1000,  multiplier: 0.95 },  // 5% off
-    { min: 5000,  multiplier: 0.90 },  // 10% off
-    { min: 10000, multiplier: 0.85 },  // 15% off
-    { min: 25000, multiplier: 0.80 }   // 20% off
+    { min: 1000,  multiplier: 0.95 },
+    { min: 5000,  multiplier: 0.90 },
+    { min: 10000, multiplier: 0.85 },
+    { min: 25000, multiplier: 0.80 }
 ];
 
-// Flat list of all products for lookup
 const ALL_PRODUCTS = [
     ...STREAMING_PRODUCTS,
     ...Object.values(REDES_PRODUCTS).flat()
 ];
 
-// ---------- CART STATE ----------
-let cart = JSON.parse(localStorage.getItem('vstg_cart') || '[]');
+// ---------- CART STATE (with cleanup on load) ----------
+let cart = [];
+try {
+    const raw = localStorage.getItem(CART_KEY) || '[]';
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+        // Filter out items with invalid product IDs
+        cart = parsed.filter(item => item && item.id && findProduct(item.id));
+    }
+} catch (e) {
+    console.warn('Cart load error, starting fresh:', e);
+    cart = [];
+}
+
 let pendingProduct = null;
 
 // ---------- DOM HELPERS ----------
 const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => document.querySelectorAll(sel);
-const formatPrice = (n) => `${CURRENCY} ${Number(n).toFixed(2)}`;
-const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const formatQty = (n) => Number(n).toLocaleString('es-PE');
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+const formatPrice = (n) => `${CURRENCY} ${Number(n || 0).toFixed(2)}`;
+const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const formatQty = (n) => Number(n || 0).toLocaleString('es-PE');
 
 // ---------- PRICE CALCULATION ----------
 function calcRedesPrice(product, qty) {
+    if (!product || !qty) return 0;
     const tier = [...TIERS].reverse().find(t => qty >= t.min) || TIERS[0];
     return qty * product.pricePerUnit * tier.multiplier;
 }
@@ -102,9 +115,17 @@ function getTierLabel(qty) {
     return '';
 }
 
+// ---------- FIND PRODUCT ----------
+function findProduct(id) {
+    return ALL_PRODUCTS.find(p => p.id === id);
+}
+
 // ---------- LOADER ----------
 window.addEventListener('load', () => {
-    setTimeout(() => $('#loader').classList.add('hidden'), 600);
+    setTimeout(() => {
+        const loader = $('#loader');
+        if (loader) loader.classList.add('hidden');
+    }, 600);
 });
 
 // ---------- RENDER PRODUCTS ----------
@@ -141,8 +162,6 @@ function streamingCardHTML(p) {
 }
 
 function redesCardHTML(p) {
-    const sampleQty = p.minQty * 10;
-    const samplePrice = calcRedesPrice(p, sampleQty);
     return `
         <article class="product-card" data-id="${p.id}">
             <span class="product-tag">${p.icon}</span>
@@ -162,15 +181,13 @@ function redesCardHTML(p) {
     `;
 }
 
-// ---------- FIND PRODUCT ----------
-function findProduct(id) {
-    return ALL_PRODUCTS.find(p => p.id === id);
-}
-
 // ---------- MODAL ----------
 function openModal(id, type) {
     const p = findProduct(id);
-    if (!p) return;
+    if (!p) {
+        showToast('Error: producto no encontrado');
+        return;
+    }
     pendingProduct = { id, type };
 
     $('#modalServiceName').textContent = p.name;
@@ -182,7 +199,7 @@ function openModal(id, type) {
     $('#profilePin').value = '';
     $('#redesLink').value = '';
     $('#redesNote').value = '';
-    ['profileName', 'profilePin', 'redesLink'].forEach(id => $('#' + id).classList.remove('invalid'));
+    ['profileName', 'profilePin', 'redesLink'].forEach(fid => $('#' + fid).classList.remove('invalid'));
 
     if (type === 'streaming') {
         $('#formFieldsStreaming').style.display = 'block';
@@ -191,12 +208,13 @@ function openModal(id, type) {
     } else {
         $('#formFieldsStreaming').style.display = 'none';
         $('#formFieldsRedes').style.display = 'block';
-        // Setup cantidad input
         const input = $('#redesCantidad');
         input.min = p.minQty;
         input.max = p.maxQty;
         input.step = p.step;
-        input.value = p.minQty * 10; // default 10x minimum
+        input.value = p.minQty * 10;
+        // Reset preset buttons
+        $$('.preset-btn').forEach(b => b.classList.remove('active'));
         updateRedesPrice();
     }
 
@@ -205,12 +223,12 @@ function openModal(id, type) {
 }
 
 function closeModal() {
-    $('#modalOverlay').classList.remove('open');
+    const overlay = $('#modalOverlay');
+    if (overlay) overlay.classList.remove('open');
     document.body.style.overflow = '';
     pendingProduct = null;
 }
 
-// Update modal price based on selected quantity
 function updateRedesPrice() {
     if (!pendingProduct || pendingProduct.type !== 'redes') return;
     const p = findProduct(pendingProduct.id);
@@ -224,7 +242,6 @@ function updateRedesPrice() {
     $('#modalServicePrice').textContent = formatPrice(price) + (tierLabel ? `  (${tierLabel})` : '');
 }
 
-// Validate and clamp quantity input
 function handleCantidadInput() {
     if (!pendingProduct || pendingProduct.type !== 'redes') return;
     const p = findProduct(pendingProduct.id);
@@ -236,9 +253,6 @@ function handleCantidadInput() {
     } else {
         input.classList.remove('invalid');
     }
-    // Clamp on blur
-    if (qty > p.maxQty) qty = p.maxQty;
-    if (qty < p.minQty && !isNaN(qty)) qty = p.minQty;
     updateRedesPrice();
 }
 
@@ -253,7 +267,6 @@ function handleCantidadBlur() {
     input.value = qty;
     input.classList.remove('invalid');
     updateRedesPrice();
-    // Update active preset button
     $$('.preset-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.preset, 10) === qty));
 }
 
@@ -272,14 +285,19 @@ function bindPresetButtons() {
 
 // ---------- CART ----------
 function addToCart(item) {
+    if (!item || !item.id) {
+        showToast('Error: item inválido');
+        return;
+    }
     cart.push(item);
     saveCart();
     updateCartUI();
     const p = findProduct(item.id);
-    showToast(`${p.name} agregado al carrito`);
+    showToast(`${p ? p.name : 'Item'} agregado al carrito`);
 }
 
 function removeFromCart(idx) {
+    if (idx < 0 || idx >= cart.length) return;
     cart.splice(idx, 1);
     saveCart();
     updateCartUI();
@@ -289,26 +307,44 @@ function clearCart() {
     cart = [];
     saveCart();
     updateCartUI();
+    showToast('Carrito vaciado');
 }
 
 function saveCart() {
-    localStorage.setItem('vstg_cart', JSON.stringify(cart));
+    try {
+        localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    } catch (e) {
+        console.warn('Cart save error:', e);
+    }
 }
 
 function truncateUrl(url, max = 50) {
+    if (!url) return '';
     if (url.length <= max) return url;
     return url.slice(0, max - 3) + '...';
 }
 
+// ---------- BULLETPROOF CART RENDER ----------
 function updateCartUI() {
     const count = cart.length;
-    $('#cartCount').textContent = count;
-    $('#cartBadge').textContent = count;
-    $('#cartCount').classList.toggle('visible', count > 0);
+
+    // Update count badges
+    const cartCountEl = $('#cartCount');
+    const cartBadgeEl = $('#cartBadge');
+    if (cartCountEl) {
+        cartCountEl.textContent = String(count);
+        cartCountEl.classList.toggle('visible', count > 0);
+    }
+    if (cartBadgeEl) {
+        cartBadgeEl.textContent = String(count);
+    }
 
     const cartBody = $('#cartBody');
     const cartFooter = $('#cartFooter');
-    if (cart.length === 0) {
+    if (!cartBody || !cartFooter) return;
+
+    if (count === 0) {
+        // Empty state
         cartBody.innerHTML = `
             <div class="cart-empty">
                 <div class="cart-empty-icon">▣</div>
@@ -316,43 +352,54 @@ function updateCartUI() {
                 <span>Agrega servicios para continuar</span>
             </div>`;
         cartFooter.style.display = 'none';
-    } else {
-        let total = 0;
-        cartBody.innerHTML = cart.map((item, idx) => {
-            const p = findProduct(item.id);
-            if (!p) return '';
-            const subtotal = item.price;
-            total += subtotal;
-            let meta = '';
-            if (item.type === 'streaming') {
-                meta = `
-                    <span class="cart-item-meta"><strong>Perfil:</strong> ${escapeHtml(item.profileName)}</span>
-                    <span class="cart-item-meta"><strong>PIN:</strong> ${escapeHtml(item.profilePin)}</span>`;
-            } else {
-                meta = `
-                    <span class="cart-item-meta"><strong>Cantidad:</strong> ${formatQty(item.qty)}</span>
-                    <span class="cart-item-meta"><strong>Link:</strong> ${escapeHtml(truncateUrl(item.redesLink))}</span>
-                    ${item.redesNote ? `<span class="cart-item-meta"><strong>Notas:</strong> ${escapeHtml(item.redesNote)}</span>` : ''}`;
-            }
-            return `
-                <div class="cart-item">
-                    <div class="cart-item-icon">${p.icon}</div>
-                    <div class="cart-item-info">
-                        <span class="cart-item-name">${p.name}</span>
-                        ${meta}
-                    </div>
-                    <div class="cart-item-price">${formatPrice(subtotal)}</div>
-                    <button class="cart-item-remove" data-remove="${idx}" type="button">Eliminar</button>
-                </div>`;
-        }).join('');
-        cartFooter.style.display = 'flex';
-        $('#cartTotal').textContent = formatPrice(total);
-
-        // Bind remove buttons (fresh binding after each render)
-        $$('[data-remove]').forEach(btn => {
-            btn.addEventListener('click', () => removeFromCart(parseInt(btn.dataset.remove, 10)));
-        });
+        return;
     }
+
+    // Render items defensively — if a product is missing, still show something
+    let total = 0;
+    const itemsHTML = cart.map((item, idx) => {
+        const p = findProduct(item.id);
+        // Use product data if found, fallback to item data
+        const name = p ? p.name : (item.name || 'Producto');
+        const icon = p ? p.icon : '?';
+        const subtotal = Number(item.price) || 0;
+        total += subtotal;
+
+        let meta = '';
+        if (item.type === 'streaming') {
+            meta = `
+                <span class="cart-item-meta"><strong>Perfil:</strong> ${escapeHtml(item.profileName)}</span>
+                <span class="cart-item-meta"><strong>PIN:</strong> ${escapeHtml(item.profilePin)}</span>`;
+        } else {
+            meta = `
+                <span class="cart-item-meta"><strong>Cantidad:</strong> ${formatQty(item.qty)}</span>
+                <span class="cart-item-meta"><strong>Link:</strong> ${escapeHtml(truncateUrl(item.redesLink))}</span>
+                ${item.redesNote ? `<span class="cart-item-meta"><strong>Notas:</strong> ${escapeHtml(item.redesNote)}</span>` : ''}`;
+        }
+        return `
+            <div class="cart-item">
+                <div class="cart-item-icon">${escapeHtml(icon)}</div>
+                <div class="cart-item-info">
+                    <span class="cart-item-name">${escapeHtml(name)}</span>
+                    ${meta}
+                </div>
+                <div class="cart-item-price">${formatPrice(subtotal)}</div>
+                <button class="cart-item-remove" data-remove="${idx}" type="button">Eliminar</button>
+            </div>`;
+    }).join('');
+
+    cartBody.innerHTML = itemsHTML;
+    cartFooter.style.display = 'flex';
+    const totalEl = $('#cartTotal');
+    if (totalEl) totalEl.textContent = formatPrice(total);
+
+    // Bind remove buttons freshly
+    $$('[data-remove]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.remove, 10);
+            removeFromCart(idx);
+        });
+    });
 }
 
 // ---------- CART DRAWER ----------
@@ -371,6 +418,7 @@ function closeCart() {
 let toastTimer;
 function showToast(msg) {
     const toast = $('#toast');
+    if (!toast) return;
     toast.textContent = msg;
     toast.classList.add('show');
     clearTimeout(toastTimer);
@@ -380,6 +428,7 @@ function showToast(msg) {
 // ---------- NAVBAR SCROLL ----------
 function bindNavbarScroll() {
     const navbar = $('#navbar');
+    if (!navbar) return;
     window.addEventListener('scroll', () => {
         navbar.classList.toggle('scrolled', window.scrollY > 50);
     });
@@ -389,6 +438,7 @@ function bindNavbarScroll() {
 function bindMobileMenu() {
     const toggle = $('#menuToggle');
     const links = $('#navLinks');
+    if (!toggle || !links) return;
     toggle.addEventListener('click', () => {
         toggle.classList.toggle('active');
         links.classList.toggle('open');
@@ -437,76 +487,83 @@ function animateCounters() {
 
 // ---------- PIN INPUT MASK ----------
 function bindPinInput() {
-    $('#profilePin').addEventListener('input', (e) => {
+    const pinInput = $('#profilePin');
+    if (!pinInput) return;
+    pinInput.addEventListener('input', (e) => {
         e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
     });
 }
 
-// ---------- FORM SUBMIT ----------
-function bindForm() {
-    $('#profileForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (!pendingProduct) return;
-        const { id, type } = pendingProduct;
+// ---------- HANDLE "AGREGAR AL CARRITO" CLICK ----------
+// Using button click instead of form submit for maximum reliability on mobile
+function handleAddToCart() {
+    if (!pendingProduct) {
+        showToast('Error: ningún producto seleccionado');
+        return;
+    }
+    const { id, type } = pendingProduct;
 
-        if (type === 'streaming') {
-            const nameInput = $('#profileName');
-            const pinInput = $('#profilePin');
-            const name = nameInput.value.trim();
-            const pin = pinInput.value.trim();
-            let valid = true;
-            if (name.length < 2 || name.length > 20) { nameInput.classList.add('invalid'); valid = false; }
-            else nameInput.classList.remove('invalid');
-            if (!/^\d{4}$/.test(pin)) { pinInput.classList.add('invalid'); valid = false; }
-            else pinInput.classList.remove('invalid');
-            if (!valid) { showToast('Revisa los datos ingresados'); return; }
+    if (type === 'streaming') {
+        const nameInput = $('#profileName');
+        const pinInput = $('#profilePin');
+        const name = nameInput.value.trim();
+        const pin = pinInput.value.trim();
+        let valid = true;
+        if (name.length < 2 || name.length > 20) { nameInput.classList.add('invalid'); valid = false; }
+        else nameInput.classList.remove('invalid');
+        if (!/^\d{4}$/.test(pin)) { pinInput.classList.add('invalid'); valid = false; }
+        else pinInput.classList.remove('invalid');
+        if (!valid) { showToast('Revisa los datos ingresados'); return; }
 
-            const p = findProduct(id);
-            addToCart({
-                id, type: 'streaming',
-                price: p.price,
-                profileName: name,
-                profilePin: pin
-            });
-        } else {
-            const cantidadInput = $('#redesCantidad');
-            const linkInput = $('#redesLink');
-            const p = findProduct(id);
-            let qty = parseInt(cantidadInput.value, 10);
-            const link = linkInput.value.trim();
-            const note = $('#redesNote').value.trim();
-            let valid = true;
-            if (isNaN(qty) || qty < p.minQty) { cantidadInput.classList.add('invalid'); valid = false; }
-            else cantidadInput.classList.remove('invalid');
-            if (!/^https?:\/\/.+\..+/.test(link)) { linkInput.classList.add('invalid'); valid = false; }
-            else linkInput.classList.remove('invalid');
-            if (!valid) { showToast('Revisa los datos ingresados'); return; }
+        const p = findProduct(id);
+        addToCart({
+            id, type: 'streaming',
+            price: p.price,
+            profileName: name,
+            profilePin: pin
+        });
+    } else {
+        const cantidadInput = $('#redesCantidad');
+        const linkInput = $('#redesLink');
+        const p = findProduct(id);
+        let qty = parseInt(cantidadInput.value, 10);
+        const link = linkInput.value.trim();
+        const note = $('#redesNote').value.trim();
+        let valid = true;
+        if (isNaN(qty) || qty < p.minQty) { cantidadInput.classList.add('invalid'); valid = false; }
+        else cantidadInput.classList.remove('invalid');
+        if (!/^https?:\/\/.+\..+/.test(link)) { linkInput.classList.add('invalid'); valid = false; }
+        else linkInput.classList.remove('invalid');
+        if (!valid) { showToast('Revisa los datos ingresados'); return; }
 
-            // Clamp
-            if (qty > p.maxQty) qty = p.maxQty;
+        if (qty > p.maxQty) qty = p.maxQty;
 
-            addToCart({
-                id, type: 'redes',
-                qty,
-                price: calcRedesPrice(p, qty),
-                redesLink: link,
-                redesNote: note
-            });
-        }
+        addToCart({
+            id, type: 'redes',
+            qty,
+            price: calcRedesPrice(p, qty),
+            redesLink: link,
+            redesNote: note
+        });
+    }
 
-        // Visual feedback on the product button
-        const prodBtn = document.querySelector(`[data-action="open-modal"][data-id="${id}"]`);
-        if (prodBtn) {
-            const originalText = prodBtn.textContent;
-            prodBtn.classList.add('added');
-            prodBtn.textContent = '✓ AGREGADO';
-            setTimeout(() => {
-                prodBtn.classList.remove('added');
-                prodBtn.textContent = originalText;
-            }, 1500);
-        }
-        closeModal();
-    });
+    // Visual feedback on the product button
+    const prodBtn = document.querySelector(`[data-action="open-modal"][data-id="${id}"]`);
+    if (prodBtn) {
+        const originalText = prodBtn.textContent;
+        prodBtn.classList.add('added');
+        prodBtn.textContent = '✓ AGREGADO';
+        setTimeout(() => {
+            prodBtn.classList.remove('added');
+            prodBtn.textContent = originalText;
+        }, 1500);
+    }
+
+    closeModal();
+    // AUTO-OPEN cart drawer so user sees the item added
+    setTimeout(() => {
+        openCart();
+    }, 200);
 }
 
 // ---------- WHATSAPP CHECKOUT ----------
@@ -529,7 +586,7 @@ function buildWhatsAppMessage() {
         } else {
             redesItems.push({ p, item });
         }
-        total += item.price;
+        total += Number(item.price) || 0;
     });
 
     if (streamingItems.length) {
@@ -579,7 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderStreaming();
     renderRedes();
 
-    // Bind all "ALQUILAR/COMPRAR" buttons (event delegation for robustness)
+    // Bind all "ALQUILAR/COMPRAR" buttons via event delegation
     document.body.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-action="open-modal"]');
         if (!btn) return;
@@ -587,30 +644,52 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal(btn.dataset.id, btn.dataset.type);
     });
 
-    // Bind cart buttons — EXPLICIT, no delegation
-    $('#cartBtn').addEventListener('click', openCart);
-    $('#cartClose').addEventListener('click', closeCart);
-    $('#cartOverlay').addEventListener('click', closeCart);
+    // Cart buttons — explicit binding
+    const cartBtn = $('#cartBtn');
+    const cartClose = $('#cartClose');
+    const cartOverlay = $('#cartOverlay');
+    if (cartBtn) cartBtn.addEventListener('click', openCart);
+    if (cartClose) cartClose.addEventListener('click', closeCart);
+    if (cartOverlay) cartOverlay.addEventListener('click', closeCart);
 
-    // Bind modal close — EXPLICIT
-    $('#modalClose').addEventListener('click', closeModal);
-    $('#modalOverlay').addEventListener('click', (e) => {
-        // Only close if clicking the overlay itself (not the modal)
-        if (e.target === $('#modalOverlay')) closeModal();
-    });
+    // Modal close — explicit binding
+    const modalClose = $('#modalClose');
+    const modalOverlay = $('#modalOverlay');
+    if (modalClose) modalClose.addEventListener('click', closeModal);
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+    }
 
-    // Bind checkout
-    $('#checkoutBtn').addEventListener('click', sendWhatsAppOrder);
-    $('#clearCartBtn').addEventListener('click', clearCart);
+    // AGREGAR AL CARRITO button — explicit click handler (more reliable than form submit)
+    const addBtn = $('#addToCartBtn');
+    if (addBtn) {
+        addBtn.addEventListener('click', handleAddToCart);
+    }
+    // Also handle form submit (Enter key)
+    const form = $('#profileForm');
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleAddToCart();
+        });
+    }
 
-    // Bind form
-    bindForm();
+    // Bind checkout buttons
+    const checkoutBtn = $('#checkoutBtn');
+    const clearCartBtn = $('#clearCartBtn');
+    if (checkoutBtn) checkoutBtn.addEventListener('click', sendWhatsAppOrder);
+    if (clearCartBtn) clearCartBtn.addEventListener('click', clearCart);
 
     // Bind cantidad input
-    $('#redesCantidad').addEventListener('input', handleCantidadInput);
-    $('#redesCantidad').addEventListener('blur', handleCantidadBlur);
+    const redesCantidad = $('#redesCantidad');
+    if (redesCantidad) {
+        redesCantidad.addEventListener('input', handleCantidadInput);
+        redesCantidad.addEventListener('blur', handleCantidadBlur);
+    }
 
-    // Bind preset buttons (after first render — but they exist in HTML, so this works)
+    // Bind preset buttons
     bindPresetButtons();
 
     // Other UI bindings
