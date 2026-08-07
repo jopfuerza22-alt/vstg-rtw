@@ -18,11 +18,11 @@ const CART_KEY = 'vstg_cart_v5'; // bumped to invalidate stale data
 
 // ---------- STREAMING PRODUCTS ----------
 const STREAMING_PRODUCTS = [
-    { id: 'nf', name: 'Netflix Premium',       icon: 'NF', desc: 'Cuenta compartida con perfil privado. Calidad 4K Ultra HD, hasta 4 dispositivos simultáneos.', price: 12, features: ['Calidad 4K UHD + HDR', 'Perfil privado propio', 'Garantía 30 días', 'Activación inmediata'] },
+    { id: 'nf', name: 'Netflix Premium',       icon: 'NF', desc: 'Cuenta compartida con perfil privado. Calidad 4K Ultra HD, hasta 4 dispositivos simultáneos.', price: 12, soldOut: true, features: ['Calidad 4K UHD + HDR', 'Perfil privado propio', 'Garantía 30 días', 'Activación inmediata'] },
     { id: 'pv', name: 'Prime Video',           icon: 'PV', desc: 'Acceso completo a Amazon Prime Video: películas, series originales y exclusivas.', price: 8,  features: ['Catálogo completo Prime', 'Perfil privado', 'Garantía 30 días', 'Activación inmediata'] },
     { id: 'hb', name: 'HBO Max',               icon: 'HB', desc: 'Estrenos de cine, series originales HBO, Warner y DC en un solo lugar.', price: 8,  features: ['Estrenos simultáneos cine', 'Perfil privado', 'Garantía 30 días', 'Activación inmediata'] },
     { id: 'ds', name: 'Disney Premium',        icon: 'DS', desc: 'Disney+, Marvel, Star Wars, Pixar y Star. Calidad 4K con perfil premium.', price: 15, features: ['Calidad 4K UHD', '4 pantallas simultáneas', 'Incluye Star contenido', 'Garantía 30 días'] },
-    { id: 'cr', name: 'Crunchyroll Mega Fan',  icon: 'CR', desc: 'Anime sin anuncios, simulcast con Japón y descargas offline en HD.', price: 8,  features: ['Sin anuncios', 'Simulcast Japón', 'Descargas offline', 'Acceso manga'] },
+    { id: 'cr', name: 'Crunchyroll Mega Fan',  icon: 'CR', desc: 'Anime sin anuncios, simulcast con Japón y descargas offline en HD. ¡Oferta por tiempo limitado!', price: 4, oldPrice: 8, sale: true, features: ['Sin anuncios', 'Simulcast Japón', 'Descargas offline', 'Acceso manga', '50% OFF — Oferta especial'] },
     { id: 'sp', name: 'Spotify Premium',       icon: 'SP', desc: 'Cuenta personal sin anuncios, descargas offline y saltos ilimitados.', price: 15, features: ['Cuenta personal', 'Sin anuncios', 'Descarga offline', 'Saltos ilimitados'] },
     { id: 'am', name: 'Apple Music',           icon: 'AM', desc: 'Más de 100 millones de canciones, descargas offline y audio sin pérdida.', price: 15, features: ['Cuenta personal', 'Audio sin pérdida', 'Descargas offline', 'Letras en tiempo real'] }
 ];
@@ -144,9 +144,46 @@ function renderRedes() {
 }
 
 function streamingCardHTML(p) {
+    const isSoldOut = p.soldOut === true;
+    const isOnSale = p.sale === true && !isSoldOut;
+
+    // Tag/badge in top-right corner
+    let badge = '';
+    if (isSoldOut) {
+        badge = `<span class="product-tag tag-soldout">AGOTADO</span>`;
+    } else if (isOnSale) {
+        badge = `<span class="product-tag tag-sale">OFERTA -50%</span>`;
+    } else {
+        badge = `<span class="product-tag">PERFIL</span>`;
+    }
+
+    // Price block
+    let priceBlock = '';
+    if (isSoldOut) {
+        priceBlock = `<div class="product-price price-soldout">${formatPrice(p.price)}</div>`;
+    } else if (isOnSale) {
+        priceBlock = `
+            <div class="product-price price-sale">
+                <span class="price-old">${formatPrice(p.oldPrice)}</span>
+                <span class="price-new">${formatPrice(p.price)}</span>
+            </div>`;
+    } else {
+        priceBlock = `<div class="product-price">${formatPrice(p.price)}</div>`;
+    }
+
+    // Button
+    let button = '';
+    if (isSoldOut) {
+        button = `<button class="add-cart-btn btn-soldout" disabled type="button">AGOTADO</button>`;
+    } else {
+        button = `<button class="add-cart-btn" data-action="open-modal" data-id="${p.id}" data-type="streaming" type="button">ALQUILAR</button>`;
+    }
+
+    const cardClass = isSoldOut ? 'product-card soldout' : (isOnSale ? 'product-card onsale' : 'product-card');
+
     return `
-        <article class="product-card" data-id="${p.id}">
-            <span class="product-tag">PERFIL</span>
+        <article class="${cardClass}" data-id="${p.id}">
+            ${badge}
             <div class="product-icon">${p.icon}</div>
             <h3 class="product-name">${p.name}</h3>
             <p class="product-desc">${p.desc}</p>
@@ -154,8 +191,8 @@ function streamingCardHTML(p) {
                 ${p.features.map(f => `<li>${f}</li>`).join('')}
             </ul>
             <div class="product-footer">
-                <div class="product-price">${formatPrice(p.price)}</div>
-                <button class="add-cart-btn" data-action="open-modal" data-id="${p.id}" data-type="streaming" type="button">ALQUILAR</button>
+                ${priceBlock}
+                ${button}
             </div>
         </article>
     `;
