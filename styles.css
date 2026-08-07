@@ -529,6 +529,104 @@ input, select, textarea { font-family: inherit; }
     border: 1px solid #fafafa;
 }
 
+/* ---------- PRODUCT STATES: SOLD OUT & ON SALE ---------- */
+
+/* SOLD OUT state */
+.product-card.soldout {
+    opacity: 0.55;
+    position: relative;
+}
+.product-card.soldout::before {
+    /* override the hover line — keep it static */
+    display: none;
+}
+.product-card.soldout:hover {
+    border-color: var(--border);
+    background: var(--bg-card);
+    transform: none;
+    box-shadow: none;
+    opacity: 0.65;
+}
+.product-card.soldout .product-icon {
+    border-color: var(--text-dim);
+    color: var(--text-dim);
+}
+.product-card.soldout:hover .product-icon {
+    background: transparent;
+    color: var(--text-dim);
+    transform: none;
+}
+.tag-soldout {
+    color: #0a0a0a !important;
+    background: #525252;
+    border-color: #525252 !important;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+.price-soldout {
+    color: var(--text-dim);
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+}
+.btn-soldout {
+    background: var(--border) !important;
+    color: var(--text-dim) !important;
+    border-color: var(--border) !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+.btn-soldout:hover {
+    background: var(--border) !important;
+    color: var(--text-dim) !important;
+    outline: none !important;
+    transform: none !important;
+}
+
+/* ON SALE state */
+.product-card.onsale {
+    border-color: #fafafa;
+    box-shadow: 0 0 0 1px rgba(250,250,250,0.4), 0 10px 40px -10px rgba(0,0,0,0.6);
+    position: relative;
+}
+.product-card.onsale::before {
+    /* keep the animated top line */
+}
+.product-card.onsale:hover {
+    border-color: #fafafa;
+}
+.tag-sale {
+    color: #0a0a0a !important;
+    background: #fafafa;
+    border-color: #fafafa !important;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    animation: salePulse 2s ease-in-out infinite;
+}
+@keyframes salePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(250,250,250,0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(250,250,250,0); }
+}
+.price-sale {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    line-height: 1;
+}
+.price-sale .price-old {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+    font-weight: 400;
+}
+.price-sale .price-new {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fafafa;
+}
+
 /* ---------- CRECE EN REDES ---------- */
 .section-redes {
     background: var(--bg-2);
