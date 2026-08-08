@@ -626,6 +626,22 @@ input, select, textarea { font-family: inherit; }
     font-weight: 700;
     color: #fafafa;
 }
+.price-period {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-left: 0.3rem;
+    vertical-align: middle;
+}
+.price-soldout .price-period {
+    color: var(--text-dim);
+}
+.product-price .price-period {
+    color: var(--text-dim);
+}
 
 /* ---------- CRECE EN REDES ---------- */
 .section-redes {
