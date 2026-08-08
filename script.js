@@ -23,7 +23,18 @@ const STREAMING_PRODUCTS = [
     { id: 'hb', name: 'HBO Max',               icon: 'HB', desc: 'Estrenos de cine, series originales HBO, Warner y DC en un solo lugar. ¡Oferta por tiempo limitado!', price: 4, oldPrice: 8, sale: true, features: ['Estrenos simultáneos cine', 'Perfil privado', 'Garantía 30 días', 'Activación inmediata', '50% OFF — Oferta especial'] },
     { id: 'ds', name: 'Disney Premium',        icon: 'DS', desc: 'Disney+, Marvel, Star Wars, Pixar y Star. Calidad 4K con perfil premium. ¡Oferta por tiempo limitado!', price: 7.50, oldPrice: 15, sale: true, features: ['Calidad 4K UHD', '4 pantallas simultáneas', 'Incluye Star contenido', 'Garantía 30 días', '50% OFF — Oferta especial'] },
     { id: 'cr', name: 'Crunchyroll Mega Fan',  icon: 'CR', desc: 'Anime sin anuncios, simulcast con Japón y descargas offline en HD. ¡Oferta por tiempo limitado!', price: 4, oldPrice: 8, sale: true, features: ['Sin anuncios', 'Simulcast Japón', 'Descargas offline', 'Acceso manga', '50% OFF — Oferta especial'] },
-    { id: 'sp', name: 'Spotify Premium',       icon: 'SP', desc: 'Cuenta personal sin anuncios, descargas offline y saltos ilimitados. ¡Promo especial 3 meses por S/30!', price: 30, oldPrice: 45, sale: true, period: 'x 3 meses', features: ['Cuenta personal', 'Sin anuncios', 'Descarga offline', 'Saltos ilimitados', 'Promo 3 meses — Antes S/45, ahora S/30'] },
+    { id: 'sp', name: 'Spotify Premium',       icon: 'SP', desc: 'Cuenta personal sin anuncios, descargas offline y saltos ilimitados. ¡Promo especial 3 meses por S/30!', price: 30, oldPrice: 45, sale: true, period: 'x 3 meses',
+      customFields: {
+          nameLabel: 'Nombre',
+          nameHint: 'Tu nombre completo',
+          namePlaceholder: 'Ej: Juan Pérez',
+          secondLabel: 'Correo electrónico',
+          secondHint: 'Te enviaremos los datos de la cuenta a este correo',
+          secondType: 'email',
+          secondPlaceholder: 'tu@correo.com'
+      },
+      urgency: 'SOLO QUEDAN 2 ÚLTIMOS CUPOS LIBRES',
+      features: ['Cuenta personal', 'Sin anuncios', 'Descarga offline', 'Saltos ilimitados', 'Promo 3 meses — Antes S/45, ahora S/30'] },
     { id: 'am', name: 'Apple Music',           icon: 'AM', desc: 'Más de 100 millones de canciones, descargas offline y audio sin pérdida.', price: 15, soldOut: true, features: ['Cuenta personal', 'Audio sin pérdida', 'Descargas offline', 'Letras en tiempo real'] }
 ];
 
@@ -243,7 +254,51 @@ function openModal(id, type) {
     if (type === 'streaming') {
         $('#formFieldsStreaming').style.display = 'block';
         $('#formFieldsRedes').style.display = 'none';
-        $('#modalServicePrice').textContent = formatPrice(p.price);
+        $('#modalServicePrice').textContent = formatPrice(p.price) + (p.period ? `  (${p.period})` : '');
+
+        // Apply custom field labels if present (e.g. Spotify uses "Nombre" + "Correo electrónico")
+        const cf = p.customFields || {};
+        const nameLabelEl = $('#profileNameLabel');
+        const nameHintEl = $('#profileNameHint');
+        const nameInput = $('#profileName');
+        const pinLabelEl = $('#profilePinLabel');
+        const pinHintEl = $('#profilePinHint');
+        const pinInput = $('#profilePin');
+
+        if (nameLabelEl) nameLabelEl.textContent = cf.nameLabel || 'Nombre del perfil';
+        if (nameHintEl) nameHintEl.textContent = cf.nameHint || 'Así aparecerá tu perfil dentro de la cuenta';
+        if (nameInput) nameInput.placeholder = cf.namePlaceholder || 'Ej: Juan';
+        if (nameInput) nameInput.maxLength = cf.namePlaceholder ? 50 : 20;
+
+        if (pinLabelEl) pinLabelEl.textContent = cf.secondLabel || 'PIN de 4 dígitos';
+        if (pinHintEl) pinHintEl.textContent = cf.secondHint || 'PIN de seguridad para bloquear tu perfil';
+
+        if (cf.secondType === 'email') {
+            pinInput.type = 'email';
+            pinInput.inputMode = 'email';
+            pinInput.maxLength = 100;
+            pinInput.pattern = '';
+            pinInput.placeholder = cf.secondPlaceholder || 'tu@correo.com';
+            pinInput.dataset.mode = 'email';
+        } else {
+            pinInput.type = 'text';
+            pinInput.inputMode = 'numeric';
+            pinInput.maxLength = 4;
+            pinInput.pattern = '\\d{4}';
+            pinInput.placeholder = '1234';
+            pinInput.dataset.mode = 'pin';
+        }
+
+        // Urgency banner
+        const urgencyEl = $('#urgencyBanner');
+        if (urgencyEl) {
+            if (p.urgency) {
+                urgencyEl.textContent = '⚠ ' + p.urgency;
+                urgencyEl.style.display = 'block';
+            } else {
+                urgencyEl.style.display = 'none';
+            }
+        }
     } else {
         $('#formFieldsStreaming').style.display = 'none';
         $('#formFieldsRedes').style.display = 'block';
@@ -406,9 +461,11 @@ function updateCartUI() {
 
         let meta = '';
         if (item.type === 'streaming') {
+            const nameLabel = item.nameLabel || 'Perfil';
+            const secondLabel = item.secondLabel || 'PIN';
             meta = `
-                <span class="cart-item-meta"><strong>Perfil:</strong> ${escapeHtml(item.profileName)}</span>
-                <span class="cart-item-meta"><strong>PIN:</strong> ${escapeHtml(item.profilePin)}</span>`;
+                <span class="cart-item-meta"><strong>${escapeHtml(nameLabel)}:</strong> ${escapeHtml(item.profileName)}</span>
+                <span class="cart-item-meta"><strong>${escapeHtml(secondLabel)}:</strong> ${escapeHtml(item.profilePin)}</span>`;
         } else {
             meta = `
                 <span class="cart-item-meta"><strong>Cantidad:</strong> ${formatQty(item.qty)}</span>
@@ -529,6 +586,8 @@ function bindPinInput() {
     const pinInput = $('#profilePin');
     if (!pinInput) return;
     pinInput.addEventListener('input', (e) => {
+        // Skip mask when in email mode
+        if (e.target.dataset.mode === 'email') return;
         e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
     });
 }
@@ -543,23 +602,38 @@ function handleAddToCart() {
     const { id, type } = pendingProduct;
 
     if (type === 'streaming') {
+        const p = findProduct(id);
+        const cf = p.customFields || {};
         const nameInput = $('#profileName');
         const pinInput = $('#profilePin');
         const name = nameInput.value.trim();
-        const pin = pinInput.value.trim();
+        const secondValue = pinInput.value.trim();
+        const nameLabel = cf.nameLabel || 'Nombre del perfil';
+        const secondLabel = cf.secondLabel || 'PIN';
+        const secondType = cf.secondType || 'pin';
+
         let valid = true;
-        if (name.length < 2 || name.length > 20) { nameInput.classList.add('invalid'); valid = false; }
+        if (name.length < 2 || name.length > 50) { nameInput.classList.add('invalid'); valid = false; }
         else nameInput.classList.remove('invalid');
-        if (!/^\d{4}$/.test(pin)) { pinInput.classList.add('invalid'); valid = false; }
-        else pinInput.classList.remove('invalid');
+
+        if (secondType === 'email') {
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(secondValue)) {
+                pinInput.classList.add('invalid'); valid = false;
+            } else pinInput.classList.remove('invalid');
+        } else {
+            if (!/^\d{4}$/.test(secondValue)) { pinInput.classList.add('invalid'); valid = false; }
+            else pinInput.classList.remove('invalid');
+        }
+
         if (!valid) { showToast('Revisa los datos ingresados'); return; }
 
-        const p = findProduct(id);
         addToCart({
             id, type: 'streaming',
             price: p.price,
             profileName: name,
-            profilePin: pin
+            profilePin: secondValue,
+            nameLabel,
+            secondLabel
         });
     } else {
         const cantidadInput = $('#redesCantidad');
@@ -631,10 +705,13 @@ function buildWhatsAppMessage() {
     if (streamingItems.length) {
         msg += `*STREAMING*%0A`;
         streamingItems.forEach(({ p, item }, i) => {
+            const nameLabel = item.nameLabel || 'Nombre del perfil';
+            const secondLabel = item.secondLabel || 'PIN';
+            const periodLabel = p.period ? ` ${p.period}` : '';
             msg += `%0A${i + 1}. ${p.name}%0A`;
-            msg += `   Precio: ${formatPrice(item.price)}%0A`;
-            msg += `   Nombre del perfil: ${encodeURIComponent(item.profileName)}%0A`;
-            msg += `   PIN: ${encodeURIComponent(item.profilePin)}%0A`;
+            msg += `   Precio: ${formatPrice(item.price)}${encodeURIComponent(periodLabel)}%0A`;
+            msg += `   ${encodeURIComponent(nameLabel)}: ${encodeURIComponent(item.profileName)}%0A`;
+            msg += `   ${encodeURIComponent(secondLabel)}: ${encodeURIComponent(item.profilePin)}%0A`;
         });
         msg += `%0A`;
     }
