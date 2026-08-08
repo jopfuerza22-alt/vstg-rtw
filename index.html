@@ -8,13 +8,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=9">
+    <link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body>
     <!-- ============ LOADER ============ -->
     <div class="loader" id="loader">
         <div class="loader-logo">
-            <img src="logo.png?v=9" alt="VG" width="100" height="100">
+            <img src="logo.png?v=10" alt="VG" width="100" height="100">
         </div>
         <div class="loader-bar"></div>
     </div>
@@ -23,7 +23,7 @@
     <nav class="navbar" id="navbar">
         <div class="nav-container">
             <a href="#hero" class="logo">
-                <img src="logo.png?v=9" alt="VG" class="logo-img">
+                <img src="logo.png?v=10" alt="VG" class="logo-img">
             </a>
             <ul class="nav-links" id="navLinks">
                 <li><a href="#streaming">Streaming</a></li>
@@ -255,7 +255,7 @@
         <div class="footer-grid">
             <div class="footer-col footer-brand">
                 <a href="#hero" class="logo">
-                    <img src="logo.png?v=9" alt="VG" class="logo-img">
+                    <img src="logo.png?v=10" alt="VG" class="logo-img">
                 </a>
                 <p>Streaming premium al instante + crecimiento en redes sociales. Garantía total y soporte 24/7.</p>
                 <div class="social">
@@ -343,17 +343,19 @@
                 <p class="modal-service-price" id="modalServicePrice">S/ 12.00</p>
             </div>
             <form id="profileForm" class="modal-form" novalidate>
+                <!-- URGENCY BANNER (shown only when product has urgency) -->
+                <div class="urgency-banner" id="urgencyBanner" style="display:none;"></div>
                 <!-- STREAMING FIELDS -->
                 <div id="formFieldsStreaming">
                     <div class="form-group">
-                        <label for="profileName">Nombre del perfil</label>
+                        <label for="profileName" id="profileNameLabel">Nombre del perfil</label>
                         <input type="text" id="profileName" name="profileName" minlength="2" maxlength="20" placeholder="Ej: Juan" autocomplete="off">
-                        <span class="form-hint">Así aparecerá tu perfil dentro de la cuenta</span>
+                        <span class="form-hint" id="profileNameHint">Así aparecerá tu perfil dentro de la cuenta</span>
                     </div>
                     <div class="form-group">
-                        <label for="profilePin">PIN de 4 dígitos</label>
+                        <label for="profilePin" id="profilePinLabel">PIN de 4 dígitos</label>
                         <input type="text" id="profilePin" name="profilePin" inputmode="numeric" maxlength="4" placeholder="1234" autocomplete="off">
-                        <span class="form-hint">PIN de seguridad para bloquear tu perfil</span>
+                        <span class="form-hint" id="profilePinHint">PIN de seguridad para bloquear tu perfil</span>
                     </div>
                 </div>
                 <!-- REDES FIELDS -->
@@ -391,6 +393,6 @@
     <!-- ============ TOAST ============ -->
     <div class="toast" id="toast"></div>
 
-    <script src="script.js?v=9"></script>
+    <script src="script.js?v=10"></script>
 </body>
 </html>
