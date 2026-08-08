@@ -23,7 +23,7 @@ const STREAMING_PRODUCTS = [
     { id: 'hb', name: 'HBO Max',               icon: 'HB', desc: 'Estrenos de cine, series originales HBO, Warner y DC en un solo lugar. ¡Oferta por tiempo limitado!', price: 4, oldPrice: 8, sale: true, features: ['Estrenos simultáneos cine', 'Perfil privado', 'Garantía 30 días', 'Activación inmediata', '50% OFF — Oferta especial'] },
     { id: 'ds', name: 'Disney Premium',        icon: 'DS', desc: 'Disney+, Marvel, Star Wars, Pixar y Star. Calidad 4K con perfil premium. ¡Oferta por tiempo limitado!', price: 7.50, oldPrice: 15, sale: true, features: ['Calidad 4K UHD', '4 pantallas simultáneas', 'Incluye Star contenido', 'Garantía 30 días', '50% OFF — Oferta especial'] },
     { id: 'cr', name: 'Crunchyroll Mega Fan',  icon: 'CR', desc: 'Anime sin anuncios, simulcast con Japón y descargas offline en HD. ¡Oferta por tiempo limitado!', price: 4, oldPrice: 8, sale: true, features: ['Sin anuncios', 'Simulcast Japón', 'Descargas offline', 'Acceso manga', '50% OFF — Oferta especial'] },
-    { id: 'sp', name: 'Spotify Premium',       icon: 'SP', desc: 'Cuenta personal sin anuncios, descargas offline y saltos ilimitados. ¡Oferta por tiempo limitado!', price: 7.50, oldPrice: 15, sale: true, features: ['Cuenta personal', 'Sin anuncios', 'Descarga offline', 'Saltos ilimitados', '50% OFF — Oferta especial'] },
+    { id: 'sp', name: 'Spotify Premium',       icon: 'SP', desc: 'Cuenta personal sin anuncios, descargas offline y saltos ilimitados. ¡Promo especial 3 meses por S/30!', price: 30, oldPrice: 45, sale: true, period: 'x 3 meses', features: ['Cuenta personal', 'Sin anuncios', 'Descarga offline', 'Saltos ilimitados', 'Promo 3 meses — Antes S/45, ahora S/30'] },
     { id: 'am', name: 'Apple Music',           icon: 'AM', desc: 'Más de 100 millones de canciones, descargas offline y audio sin pérdida.', price: 15, soldOut: true, features: ['Cuenta personal', 'Audio sin pérdida', 'Descargas offline', 'Letras en tiempo real'] }
 ];
 
@@ -152,23 +152,25 @@ function streamingCardHTML(p) {
     if (isSoldOut) {
         badge = `<span class="product-tag tag-soldout">AGOTADO</span>`;
     } else if (isOnSale) {
-        badge = `<span class="product-tag tag-sale">OFERTA -50%</span>`;
+        const saleLabel = p.period ? `PROMO ${p.period.toUpperCase().replace('X ', '')}` : 'OFERTA -50%';
+        badge = `<span class="product-tag tag-sale">${saleLabel}</span>`;
     } else {
         badge = `<span class="product-tag">PERFIL</span>`;
     }
 
     // Price block
     let priceBlock = '';
+    const periodLabel = p.period ? `<span class="price-period">${p.period}</span>` : '';
     if (isSoldOut) {
-        priceBlock = `<div class="product-price price-soldout">${formatPrice(p.price)}</div>`;
+        priceBlock = `<div class="product-price price-soldout">${formatPrice(p.price)}${periodLabel}</div>`;
     } else if (isOnSale) {
         priceBlock = `
             <div class="product-price price-sale">
-                <span class="price-old">${formatPrice(p.oldPrice)}</span>
-                <span class="price-new">${formatPrice(p.price)}</span>
+                <span class="price-old">${formatPrice(p.oldPrice)}${p.period ? ` ${p.period}` : ''}</span>
+                <span class="price-new">${formatPrice(p.price)}${periodLabel}</span>
             </div>`;
     } else {
-        priceBlock = `<div class="product-price">${formatPrice(p.price)}</div>`;
+        priceBlock = `<div class="product-price">${formatPrice(p.price)}${periodLabel}</div>`;
     }
 
     // Button
