@@ -97,7 +97,7 @@ function streamingCardHTML(p) {
 
     // Logo HTML: image if available, else text icon
     const logoHTML = p.logo
-        ? `<img src="${p.logo}?v=12" alt="${escapeHtml(p.name)}" class="product-logo-img">`
+        ? `<img src="${p.logo}?v=13" alt="${escapeHtml(p.name)}" class="product-logo-img">`
         : `<div class="product-icon">${p.icon}</div>`;
 
     // Tag/badge in top-right corner
@@ -499,21 +499,31 @@ function bindUrgentPopup() {
         });
     }
 
-    // CTA button → opens Spotify modal directly
+    // CTA button → smooth scroll to the Spotify card in the streaming section
     const ctaBtn = $('#popupCta');
     if (ctaBtn) {
         ctaBtn.addEventListener('click', () => {
             closeUrgentPopup();
-            // Scroll to streaming section first
-            const streamingSection = document.getElementById('streaming');
-            if (streamingSection) {
-                const top = streamingSection.getBoundingClientRect().top + window.pageYOffset - 60;
-                window.scrollTo({ top, behavior: 'smooth' });
+            // Find the Spotify product card in the streaming grid
+            const spotifyCard = document.querySelector('[data-id="sp"]');
+            if (spotifyCard) {
+                setTimeout(() => {
+                    const top = spotifyCard.getBoundingClientRect().top + window.pageYOffset - 80;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                    // Briefly highlight the card to draw attention
+                    setTimeout(() => {
+                        spotifyCard.classList.add('card-highlight');
+                        setTimeout(() => spotifyCard.classList.remove('card-highlight'), 2000);
+                    }, 700);
+                }, 300);
+            } else {
+                // Fallback: scroll to streaming section
+                const streamingSection = document.getElementById('streaming');
+                if (streamingSection) {
+                    const top = streamingSection.getBoundingClientRect().top + window.pageYOffset - 60;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                }
             }
-            // Open the Spotify modal after a brief delay
-            setTimeout(() => {
-                openModal(URGENT_PRODUCT_ID, 'streaming');
-            }, 500);
         });
     }
 }
