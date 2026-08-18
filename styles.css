@@ -423,30 +423,59 @@ input, select, textarea { font-family: inherit; }
     overflow: hidden;
     transform: translateZ(0);
 }
+/* Subtle platform-color gradient on the card border (left strip + top glow) */
 .product-card::before {
     content: '';
     position: absolute; top: 0; left: 0;
-    width: 100%; height: 1px;
-    background: linear-gradient(90deg, transparent, #fafafa, transparent);
-    transform: translateX(-100%);
-    transition: transform .8s var(--ease-out);
+    width: 4px; height: 100%;
+    background: linear-gradient(180deg, var(--platform-color, #fafafa), transparent);
+    opacity: 0.6;
+    transition: opacity .4s var(--ease-out), width .4s var(--ease-out);
+    z-index: 1;
+    border-radius: 6px 0 0 6px;
 }
 .product-card::after {
     content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(250,250,250,0.06), transparent 60%);
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 200px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--platform-color, #fafafa) 12%, transparent), transparent);
     opacity: 0;
     transition: opacity .4s var(--ease);
     pointer-events: none;
 }
+.product-card:hover::before { opacity: 1; width: 5px; }
 .product-card:hover::after { opacity: 1; }
 .product-card:hover {
-    border-color: #fafafa;
+    border-color: color-mix(in srgb, var(--platform-color, #fafafa) 60%, #fafafa);
     transform: translateY(-6px);
     background: var(--bg-3);
-    box-shadow: 0 25px 50px -20px rgba(0,0,0,0.8);
+    box-shadow: 0 25px 50px -20px rgba(0,0,0,0.8),
+                0 0 30px -10px color-mix(in srgb, var(--platform-color, #fafafa) 40%, transparent);
 }
-.product-card:hover::before { transform: translateX(100%); }
+
+/* Platform logo image */
+.product-logo-img {
+    width: 56px; height: 56px;
+    object-fit: contain;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    padding: 6px;
+    background: #ffffff;
+    border: 1px solid color-mix(in srgb, var(--platform-color, #fafafa) 40%, #404040);
+    transition: transform .4s var(--ease-out), box-shadow .4s var(--ease-out);
+}
+.product-card:hover .product-logo-img {
+    transform: scale(1.08);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--platform-color, #fafafa) 50%, transparent);
+}
+.product-card.soldout .product-logo-img {
+    opacity: 0.55;
+    filter: grayscale(0.6);
+}
+.product-card.soldout:hover .product-logo-img {
+    transform: none;
+    box-shadow: none;
+}
 .product-icon {
     width: 56px; height: 56px;
     border: 1px solid #fafafa;
@@ -537,8 +566,9 @@ input, select, textarea { font-family: inherit; }
     position: relative;
 }
 .product-card.soldout::before {
-    /* override the hover line — keep it static */
-    display: none;
+    /* Keep the gradient but greyed out */
+    background: linear-gradient(180deg, var(--text-dim), transparent);
+    opacity: 0.4;
 }
 .product-card.soldout:hover {
     border-color: var(--border);
@@ -547,6 +577,8 @@ input, select, textarea { font-family: inherit; }
     box-shadow: none;
     opacity: 0.65;
 }
+.product-card.soldout:hover::before { opacity: 0.4; width: 4px; }
+.product-card.soldout:hover::after { opacity: 0; }
 .product-card.soldout .product-icon {
     border-color: var(--text-dim);
     color: var(--text-dim);
@@ -584,12 +616,16 @@ input, select, textarea { font-family: inherit; }
 
 /* ON SALE state */
 .product-card.onsale {
-    border-color: #fafafa;
-    box-shadow: 0 0 0 1px rgba(250,250,250,0.4), 0 10px 40px -10px rgba(0,0,0,0.6);
+    border-color: color-mix(in srgb, var(--platform-color, #fafafa) 70%, #fafafa);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--platform-color, #fafafa) 30%, transparent),
+                0 10px 40px -10px rgba(0,0,0,0.6);
     position: relative;
 }
 .product-card.onsale::before {
-    /* keep the animated top line */
+    /* Stronger gradient for on-sale items */
+    opacity: 1;
+    width: 5px;
+    background: linear-gradient(180deg, var(--platform-color, #fafafa), color-mix(in srgb, var(--platform-color, #fafafa) 30%, transparent));
 }
 .product-card.onsale:hover {
     border-color: #fafafa;
