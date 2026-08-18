@@ -38,55 +38,11 @@ const STREAMING_PRODUCTS = [
     { id: 'am', name: 'Apple Music',           icon: 'AM', desc: 'Más de 100 millones de canciones, descargas offline y audio sin pérdida.', price: 15, soldOut: true, features: ['Cuenta personal', 'Audio sin pérdida', 'Descargas offline', 'Letras en tiempo real'] }
 ];
 
-// ---------- REDES PRODUCTS ----------
-const REDES_PRODUCTS = {
-    seguidores: [
-        { id: 'sg-ig', name: 'Seguidores Instagram', icon: 'IG', desc: 'Seguidores reales y estables para tu cuenta de Instagram.', features: ['Seguidores reales', 'Entrega gradual', 'Sin contraseña', 'Garantía reposición 30 días'],
-          pricePerUnit: 0.012, minQty: 100, maxQty: 50000, step: 100 },
-        { id: 'sg-fb', name: 'Seguidores Facebook',  icon: 'FB', desc: 'Impulsa tu página de Facebook con seguidores reales y activos.', features: ['Seguidores reales', 'Entrega gradual', 'Sin contraseña', 'Garantía reposición'],
-          pricePerUnit: 0.015, minQty: 100, maxQty: 50000, step: 100 },
-        { id: 'sg-tk', name: 'Seguidores TikTok',    icon: 'TK', desc: 'Crece en TikTok con seguidores estables, sin riesgo de baneo.', features: ['Seguidores reales', 'Entrega gradual', 'Sin riesgo de baneo', 'Garantía 30 días'],
-          pricePerUnit: 0.010, minQty: 100, maxQty: 50000, step: 100 }
-    ],
-    likes: [
-        { id: 'lk-ig', name: 'Likes Instagram',  icon: 'IG', desc: 'Likes reales para tus publicaciones de Instagram, baja caída.', features: ['Likes reales', 'Reparto gradual', 'Baja caída', 'Garantía 30 días'],
-          pricePerUnit: 0.008, minQty: 50, maxQty: 50000, step: 50 },
-        { id: 'lk-fb', name: 'Likes Facebook',   icon: 'FB', desc: 'Likes para tus publicaciones o página de Facebook.', features: ['Likes reales', 'Reparto gradual', 'Estables', 'Garantía reposición'],
-          pricePerUnit: 0.010, minQty: 50, maxQty: 50000, step: 50 },
-        { id: 'lk-tk', name: 'Likes TikTok',     icon: 'TK', desc: 'Likes para tus videos de TikTok y mayor viralidad.', features: ['Likes reales', 'Reparto gradual', 'Sin riesgo de baneo', 'Garantía 30 días'],
-          pricePerUnit: 0.006, minQty: 50, maxQty: 50000, step: 50 }
-    ],
-    comentarios: [
-        { id: 'cm-ig', name: 'Comentarios Instagram', icon: 'IG', desc: 'Comentarios reales y personalizados para tu publicación de Instagram.', features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 1-2 días'],
-          pricePerUnit: 0.12, minQty: 10, maxQty: 5000, step: 10 },
-        { id: 'cm-fb', name: 'Comentarios Facebook',  icon: 'FB', desc: 'Comentarios reales para tus publicaciones de Facebook.', features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 1-2 días'],
-          pricePerUnit: 0.14, minQty: 10, maxQty: 5000, step: 10 },
-        { id: 'cm-tk', name: 'Comentarios TikTok',    icon: 'TK', desc: 'Comentarios reales para tus videos de TikTok.', features: ['Comentarios reales', 'Personalizables', 'Cuentas activas', 'Entrega 1-2 días'],
-          pricePerUnit: 0.10, minQty: 10, maxQty: 5000, step: 10 }
-    ],
-    vistas: [
-        { id: 'vs-ig', name: 'Vistas Instagram', icon: 'IG', desc: 'Vistas reales para tus Reels o videos de Instagram.', features: ['Vistas reales', 'Entrega rápida', 'Estables', 'Sin contraseña'],
-          pricePerUnit: 0.0008, minQty: 1000, maxQty: 500000, step: 1000 },
-        { id: 'vs-fb', name: 'Vistas Facebook',  icon: 'FB', desc: 'Vistas para tus videos publicados en Facebook.', features: ['Vistas reales', 'Entrega gradual', 'Estables', 'Sin contraseña'],
-          pricePerUnit: 0.001, minQty: 1000, maxQty: 500000, step: 1000 },
-        { id: 'vs-tk', name: 'Vistas TikTok',    icon: 'TK', desc: 'Vistas reales para tus videos de TikTok, empuja al For You.', features: ['Vistas reales', 'Entrega gradual', 'Sin riesgo de baneo', 'Sin contraseña'],
-          pricePerUnit: 0.0005, minQty: 1000, maxQty: 500000, step: 1000 }
-    ]
-};
+// ---------- REDES PRODUCTS (REMOVED) ----------
+// User requested to remove "Crece en Redes" section entirely.
+// Only streaming services are now shown.
 
-// Volume discount tiers
-const TIERS = [
-    { min: 0,     multiplier: 1.0 },
-    { min: 1000,  multiplier: 0.95 },
-    { min: 5000,  multiplier: 0.90 },
-    { min: 10000, multiplier: 0.85 },
-    { min: 25000, multiplier: 0.80 }
-];
-
-const ALL_PRODUCTS = [
-    ...STREAMING_PRODUCTS,
-    ...Object.values(REDES_PRODUCTS).flat()
-];
+const ALL_PRODUCTS = [...STREAMING_PRODUCTS];
 
 // ---------- CART STATE (with cleanup on load) ----------
 let cart = [];
@@ -112,19 +68,7 @@ const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;'
 const formatQty = (n) => Number(n || 0).toLocaleString('es-PE');
 
 // ---------- PRICE CALCULATION ----------
-function calcRedesPrice(product, qty) {
-    if (!product || !qty) return 0;
-    const tier = [...TIERS].reverse().find(t => qty >= t.min) || TIERS[0];
-    return qty * product.pricePerUnit * tier.multiplier;
-}
-
-function getTierLabel(qty) {
-    const tier = [...TIERS].reverse().find(t => qty >= t.min) || TIERS[0];
-    if (tier.multiplier < 1) {
-        return `${Math.round((1 - tier.multiplier) * 100)}% OFF aplicado`;
-    }
-    return '';
-}
+// (redes pricing removed — only streaming flat prices used now)
 
 // ---------- FIND PRODUCT ----------
 function findProduct(id) {
@@ -144,14 +88,6 @@ function renderStreaming() {
     const grid = $('#streamingGrid');
     if (!grid) return;
     grid.innerHTML = STREAMING_PRODUCTS.map(p => streamingCardHTML(p)).join('');
-}
-
-function renderRedes() {
-    Object.entries(REDES_PRODUCTS).forEach(([key, items]) => {
-        const grid = $(`#${key}Grid`);
-        if (!grid) return;
-        grid.innerHTML = items.map(p => redesCardHTML(p)).join('');
-    });
 }
 
 function streamingCardHTML(p) {
@@ -206,26 +142,6 @@ function streamingCardHTML(p) {
             <div class="product-footer">
                 ${priceBlock}
                 ${button}
-            </div>
-        </article>
-    `;
-}
-
-function redesCardHTML(p) {
-    return `
-        <article class="product-card" data-id="${p.id}">
-            <span class="product-tag">${p.icon}</span>
-            <div class="product-icon">${p.icon}</div>
-            <h3 class="product-name">${p.name}</h3>
-            <p class="product-desc">${p.desc}</p>
-            <ul class="product-features">
-                ${p.features.map(f => `<li>${f}</li>`).join('')}
-                <li>Cantidad: ${formatQty(p.minQty)} a ${formatQty(p.maxQty)}</li>
-                <li>Descuentos por volumen</li>
-            </ul>
-            <div class="product-footer">
-                <div class="product-price">Desde ${formatPrice(p.pricePerUnit * p.minQty)}</div>
-                <button class="add-cart-btn" data-action="open-modal" data-id="${p.id}" data-type="redes" type="button">COMPRAR</button>
             </div>
         </article>
     `;
@@ -299,18 +215,8 @@ function openModal(id, type) {
                 urgencyEl.style.display = 'none';
             }
         }
-    } else {
-        $('#formFieldsStreaming').style.display = 'none';
-        $('#formFieldsRedes').style.display = 'block';
-        const input = $('#redesCantidad');
-        input.min = p.minQty;
-        input.max = p.maxQty;
-        input.step = p.step;
-        input.value = p.minQty * 10;
-        // Reset preset buttons
-        $$('.preset-btn').forEach(b => b.classList.remove('active'));
-        updateRedesPrice();
     }
+    // (redes branch removed — only streaming products exist now)
 
     $('#modalOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -321,60 +227,6 @@ function closeModal() {
     if (overlay) overlay.classList.remove('open');
     document.body.style.overflow = '';
     pendingProduct = null;
-}
-
-function updateRedesPrice() {
-    if (!pendingProduct || pendingProduct.type !== 'redes') return;
-    const p = findProduct(pendingProduct.id);
-    if (!p) return;
-    const input = $('#redesCantidad');
-    let qty = parseInt(input.value, 10);
-    if (isNaN(qty)) qty = p.minQty;
-    qty = Math.max(p.minQty, Math.min(p.maxQty, qty));
-    const price = calcRedesPrice(p, qty);
-    const tierLabel = getTierLabel(qty);
-    $('#modalServicePrice').textContent = formatPrice(price) + (tierLabel ? `  (${tierLabel})` : '');
-}
-
-function handleCantidadInput() {
-    if (!pendingProduct || pendingProduct.type !== 'redes') return;
-    const p = findProduct(pendingProduct.id);
-    if (!p) return;
-    const input = $('#redesCantidad');
-    let qty = parseInt(input.value, 10);
-    if (isNaN(qty) || qty < p.minQty) {
-        input.classList.add('invalid');
-    } else {
-        input.classList.remove('invalid');
-    }
-    updateRedesPrice();
-}
-
-function handleCantidadBlur() {
-    if (!pendingProduct || pendingProduct.type !== 'redes') return;
-    const p = findProduct(pendingProduct.id);
-    if (!p) return;
-    const input = $('#redesCantidad');
-    let qty = parseInt(input.value, 10);
-    if (isNaN(qty) || qty < p.minQty) qty = p.minQty;
-    if (qty > p.maxQty) qty = p.maxQty;
-    input.value = qty;
-    input.classList.remove('invalid');
-    updateRedesPrice();
-    $$('.preset-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.preset, 10) === qty));
-}
-
-function bindPresetButtons() {
-    $$('.preset-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const val = parseInt(btn.dataset.preset, 10);
-            $('#redesCantidad').value = val;
-            $$('.preset-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            $('#redesCantidad').classList.remove('invalid');
-            updateRedesPrice();
-        });
-    });
 }
 
 // ---------- CART ----------
@@ -592,6 +444,74 @@ function bindPinInput() {
     });
 }
 
+// ---------- URGENT POPUP (Spotify Premium on load) ----------
+const URGENT_PRODUCT_ID = 'sp'; // Spotify Premium x 3 meses
+const URGENT_POPUP_KEY = 'vstg_popup_seen_v1'; // session flag
+
+function openUrgentPopup() {
+    const overlay = $('#popupOverlay');
+    if (!overlay) return;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeUrgentPopup() {
+    const overlay = $('#popupOverlay');
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function bindUrgentPopup() {
+    // Show popup after 1.5s if not seen in this session
+    try {
+        const seen = sessionStorage.getItem(URGENT_POPUP_KEY);
+        if (!seen) {
+            setTimeout(() => {
+                openUrgentPopup();
+                sessionStorage.setItem(URGENT_POPUP_KEY, '1');
+            }, 1500);
+        }
+    } catch (e) {
+        // sessionStorage might be blocked; show popup anyway
+        setTimeout(openUrgentPopup, 1500);
+    }
+
+    // Close button
+    const closeBtn = $('#popupClose');
+    if (closeBtn) closeBtn.addEventListener('click', closeUrgentPopup);
+
+    // Dismiss ("Seguir explorando")
+    const dismissBtn = $('#popupDismiss');
+    if (dismissBtn) dismissBtn.addEventListener('click', closeUrgentPopup);
+
+    // Click outside to close
+    const overlay = $('#popupOverlay');
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeUrgentPopup();
+        });
+    }
+
+    // CTA button → opens Spotify modal directly
+    const ctaBtn = $('#popupCta');
+    if (ctaBtn) {
+        ctaBtn.addEventListener('click', () => {
+            closeUrgentPopup();
+            // Scroll to streaming section first
+            const streamingSection = document.getElementById('streaming');
+            if (streamingSection) {
+                const top = streamingSection.getBoundingClientRect().top + window.pageYOffset - 60;
+                window.scrollTo({ top, behavior: 'smooth' });
+            }
+            // Open the Spotify modal after a brief delay
+            setTimeout(() => {
+                openModal(URGENT_PRODUCT_ID, 'streaming');
+            }, 500);
+        });
+    }
+}
+
 // ---------- HANDLE "AGREGAR AL CARRITO" CLICK ----------
 // Using button click instead of form submit for maximum reliability on mobile
 function handleAddToCart() {
@@ -635,30 +555,8 @@ function handleAddToCart() {
             nameLabel,
             secondLabel
         });
-    } else {
-        const cantidadInput = $('#redesCantidad');
-        const linkInput = $('#redesLink');
-        const p = findProduct(id);
-        let qty = parseInt(cantidadInput.value, 10);
-        const link = linkInput.value.trim();
-        const note = $('#redesNote').value.trim();
-        let valid = true;
-        if (isNaN(qty) || qty < p.minQty) { cantidadInput.classList.add('invalid'); valid = false; }
-        else cantidadInput.classList.remove('invalid');
-        if (!/^https?:\/\/.+\..+/.test(link)) { linkInput.classList.add('invalid'); valid = false; }
-        else linkInput.classList.remove('invalid');
-        if (!valid) { showToast('Revisa los datos ingresados'); return; }
-
-        if (qty > p.maxQty) qty = p.maxQty;
-
-        addToCart({
-            id, type: 'redes',
-            qty,
-            price: calcRedesPrice(p, qty),
-            redesLink: link,
-            redesNote: note
-        });
     }
+    // (redes branch removed — only streaming products exist now)
 
     // Visual feedback on the product button
     const prodBtn = document.querySelector(`[data-action="open-modal"][data-id="${id}"]`);
@@ -750,7 +648,6 @@ function sendWhatsAppOrder() {
 document.addEventListener('DOMContentLoaded', () => {
     // Render products
     renderStreaming();
-    renderRedes();
 
     // Bind all "ALQUILAR/COMPRAR" buttons via event delegation
     document.body.addEventListener('click', (e) => {
@@ -798,16 +695,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (checkoutBtn) checkoutBtn.addEventListener('click', sendWhatsAppOrder);
     if (clearCartBtn) clearCartBtn.addEventListener('click', clearCart);
 
-    // Bind cantidad input
-    const redesCantidad = $('#redesCantidad');
-    if (redesCantidad) {
-        redesCantidad.addEventListener('input', handleCantidadInput);
-        redesCantidad.addEventListener('blur', handleCantidadBlur);
-    }
-
-    // Bind preset buttons
-    bindPresetButtons();
-
     // Other UI bindings
     bindNavbarScroll();
     bindMobileMenu();
@@ -815,11 +702,15 @@ document.addEventListener('DOMContentLoaded', () => {
     animateCounters();
     bindPinInput();
 
+    // Bind urgent popup (Spotify Premium promo on load)
+    bindUrgentPopup();
+
     // ESC closes everything
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeCart();
             closeModal();
+            closeUrgentPopup();
         }
     });
 
