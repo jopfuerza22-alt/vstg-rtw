@@ -18,12 +18,12 @@ const CART_KEY = 'vstg_cart_v5'; // bumped to invalidate stale data
 
 // ---------- STREAMING PRODUCTS ----------
 const STREAMING_PRODUCTS = [
-    { id: 'nf', name: 'Netflix Premium',       icon: 'NF', desc: 'Cuenta compartida con perfil privado. Calidad 4K Ultra HD, hasta 4 dispositivos simultáneos.', price: 12, soldOut: true, features: ['Calidad 4K UHD + HDR', 'Perfil privado propio', 'Garantía 30 días', 'Activación inmediata'] },
-    { id: 'pv', name: 'Prime Video',           icon: 'PV', desc: 'Acceso completo a Amazon Prime Video: películas, series originales y exclusivas. ¡Oferta por tiempo limitado!', price: 4, oldPrice: 8, sale: true, features: ['Catálogo completo Prime', 'Perfil privado', 'Garantía 30 días', 'Activación inmediata', '50% OFF — Oferta especial'] },
-    { id: 'hb', name: 'HBO Max',               icon: 'HB', desc: 'Estrenos de cine, series originales HBO, Warner y DC en un solo lugar. ¡Oferta por tiempo limitado!', price: 4, oldPrice: 8, sale: true, features: ['Estrenos simultáneos cine', 'Perfil privado', 'Garantía 30 días', 'Activación inmediata', '50% OFF — Oferta especial'] },
-    { id: 'ds', name: 'Disney Premium',        icon: 'DS', desc: 'Disney+, Marvel, Star Wars, Pixar y Star. Calidad 4K con perfil premium. ¡Oferta por tiempo limitado!', price: 7.50, oldPrice: 15, sale: true, features: ['Calidad 4K UHD', '4 pantallas simultáneas', 'Incluye Star contenido', 'Garantía 30 días', '50% OFF — Oferta especial'] },
-    { id: 'cr', name: 'Crunchyroll Mega Fan',  icon: 'CR', desc: 'Anime sin anuncios, simulcast con Japón y descargas offline en HD. ¡Oferta por tiempo limitado!', price: 4, oldPrice: 8, sale: true, features: ['Sin anuncios', 'Simulcast Japón', 'Descargas offline', 'Acceso manga', '50% OFF — Oferta especial'] },
-    { id: 'sp', name: 'Spotify Premium',       icon: 'SP', desc: 'Cuenta personal sin anuncios, descargas offline y saltos ilimitados. ¡Promo especial 3 meses por S/30!', price: 30, oldPrice: 45, sale: true, period: 'x 3 meses',
+    { id: 'nf', name: 'Netflix Premium',       icon: 'NF', logo: 'logo-netflix.png',    color: '#E50914', desc: 'Cuenta compartida con perfil privado. Calidad 4K Ultra HD, hasta 4 dispositivos simultáneos.', price: 12, soldOut: true, features: ['Calidad 4K UHD + HDR', 'Perfil privado propio', 'Garantía 30 días', 'Activación inmediata'] },
+    { id: 'pv', name: 'Prime Video',           icon: 'PV', logo: 'logo-prime.jpg',      color: '#00A8E1', desc: 'Acceso completo a Amazon Prime Video: películas, series originales y exclusivas. ¡Oferta por tiempo limitado!', price: 4, oldPrice: 8, sale: true, features: ['Catálogo completo Prime', 'Perfil privado', 'Garantía 30 días', 'Activación inmediata', '50% OFF — Oferta especial'] },
+    { id: 'hb', name: 'HBO Max',               icon: 'HB', logo: 'logo-hbomax.jpg',     color: '#7B2BF9', desc: 'Estrenos de cine, series originales HBO, Warner y DC en un solo lugar. ¡Oferta por tiempo limitado!', price: 4, oldPrice: 8, sale: true, features: ['Estrenos simultáneos cine', 'Perfil privado', 'Garantía 30 días', 'Activación inmediata', '50% OFF — Oferta especial'] },
+    { id: 'ds', name: 'Disney Premium',        icon: 'DS', logo: 'logo-disney.jpg',     color: '#0CC5E8', desc: 'Disney+, Marvel, Star Wars, Pixar y Star. Calidad 4K con perfil premium. ¡Oferta por tiempo limitado!', price: 7.50, oldPrice: 15, sale: true, features: ['Calidad 4K UHD', '4 pantallas simultáneas', 'Incluye Star contenido', 'Garantía 30 días', '50% OFF — Oferta especial'] },
+    { id: 'cr', name: 'Crunchyroll Mega Fan',  icon: 'CR', logo: 'logo-crunchyroll.jpg', color: '#F47521', desc: 'Anime sin anuncios, simulcast con Japón y descargas offline en HD. ¡Oferta por tiempo limitado!', price: 4, oldPrice: 8, sale: true, features: ['Sin anuncios', 'Simulcast Japón', 'Descargas offline', 'Acceso manga', '50% OFF — Oferta especial'] },
+    { id: 'sp', name: 'Spotify Premium',       icon: 'SP', logo: 'logo-spotify.jpg',    color: '#1DB954', desc: 'Cuenta personal sin anuncios, descargas offline y saltos ilimitados. ¡Promo especial 3 meses por S/30!', price: 30, oldPrice: 45, sale: true, period: 'x 3 meses',
       customFields: {
           nameLabel: 'Nombre',
           nameHint: 'Tu nombre completo',
@@ -35,7 +35,7 @@ const STREAMING_PRODUCTS = [
       },
       urgency: 'SOLO QUEDAN 2 ÚLTIMOS CUPOS LIBRES',
       features: ['Cuenta personal', 'Sin anuncios', 'Descarga offline', 'Saltos ilimitados', 'Promo 3 meses — Antes S/45, ahora S/30'] },
-    { id: 'am', name: 'Apple Music',           icon: 'AM', desc: 'Más de 100 millones de canciones, descargas offline y audio sin pérdida.', price: 15, soldOut: true, features: ['Cuenta personal', 'Audio sin pérdida', 'Descargas offline', 'Letras en tiempo real'] }
+    { id: 'am', name: 'Apple Music',           icon: 'AM', logo: null,                 color: '#FA2572', desc: 'Más de 100 millones de canciones, descargas offline y audio sin pérdida.', price: 15, soldOut: true, features: ['Cuenta personal', 'Audio sin pérdida', 'Descargas offline', 'Letras en tiempo real'] }
 ];
 
 // ---------- REDES PRODUCTS (REMOVED) ----------
@@ -93,6 +93,12 @@ function renderStreaming() {
 function streamingCardHTML(p) {
     const isSoldOut = p.soldOut === true;
     const isOnSale = p.sale === true && !isSoldOut;
+    const platformColor = p.color || '#fafafa';
+
+    // Logo HTML: image if available, else text icon
+    const logoHTML = p.logo
+        ? `<img src="${p.logo}?v=12" alt="${escapeHtml(p.name)}" class="product-logo-img">`
+        : `<div class="product-icon">${p.icon}</div>`;
 
     // Tag/badge in top-right corner
     let badge = '';
@@ -131,9 +137,9 @@ function streamingCardHTML(p) {
     const cardClass = isSoldOut ? 'product-card soldout' : (isOnSale ? 'product-card onsale' : 'product-card');
 
     return `
-        <article class="${cardClass}" data-id="${p.id}">
+        <article class="${cardClass}" data-id="${p.id}" style="--platform-color: ${platformColor};">
             ${badge}
-            <div class="product-icon">${p.icon}</div>
+            ${logoHTML}
             <h3 class="product-name">${p.name}</h3>
             <p class="product-desc">${p.desc}</p>
             <ul class="product-features">
