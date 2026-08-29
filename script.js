@@ -35,10 +35,9 @@ const STREAMING_PRODUCTS = [
       },
       urgency: 'SOLO QUEDAN 2 ÚLTIMOS CUPOS LIBRES',
       features: ['Cuenta personal', 'Sin anuncios', 'Descarga offline', 'Saltos ilimitados', 'Promo 3 meses — Antes S/45, ahora S/30'] },
-    { id: 'am', name: 'Apple Combo', icon: 'AP', logo: null, color: '#FA2572',
+    { id: 'am', name: 'Apple Combo', icon: 'AP', logo: 'logo-applecombo.png', color: '#FA2572',
       desc: 'Combo completo Apple: Apple Music + iCloud + Apple TV + Apple Arcade. Renovación mensual.',
       price: 20, period: 'x mes',
-      bgImage: 'logo-applecombo.png',
       customFields: {
           nameLabel: 'Correo electrónico',
           nameHint: 'Te enviaremos los datos de la cuenta a este correo',
@@ -108,7 +107,7 @@ function streamingCardHTML(p) {
 
     // Logo HTML: image if available, else text icon
     const logoHTML = p.logo
-        ? `<img src="${p.logo}?v=15" alt="${escapeHtml(p.name)}" class="product-logo-img">`
+        ? `<img src="${p.logo}?v=16" alt="${escapeHtml(p.name)}" class="product-logo-img">`
         : `<div class="product-icon">${p.icon}</div>`;
 
     // Tag/badge in top-right corner
@@ -146,12 +145,9 @@ function streamingCardHTML(p) {
     }
 
     const cardClass = isSoldOut ? 'product-card soldout' : (isOnSale ? 'product-card onsale' : 'product-card');
-    const cardExtraClass = p.bgImage ? ' has-bgimage' : '';
-    const bgStyle = p.bgImage ? ` style="background-image: url('${p.bgImage}?v=15'); --platform-color: ${platformColor};"` : ` style="--platform-color: ${platformColor};"`;
 
     return `
-        <article class="${cardClass}${cardExtraClass}" data-id="${p.id}"${bgStyle}>
-            <div class="card-bg-overlay"></div>
+        <article class="${cardClass}" data-id="${p.id}" style="--platform-color: ${platformColor};">
             ${badge}
             ${logoHTML}
             <h3 class="product-name">${p.name}</h3>
