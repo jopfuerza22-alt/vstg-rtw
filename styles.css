@@ -1182,8 +1182,8 @@ input, select, textarea { font-family: inherit; }
 }
 .popup-dismiss:hover { color: #1ed760; }
 
-/* CTA button — green Spotify style override */
-.popup-card .btn-primary {
+/* CTA button — green Spotify style override (default popup) */
+#popupCard .btn-primary {
     background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
     color: #0a0a0a;
     border-color: #1DB954;
@@ -1191,12 +1191,89 @@ input, select, textarea { font-family: inherit; }
     z-index: 2;
     box-shadow: 0 0 25px rgba(29, 185, 84, 0.4);
 }
-.popup-card .btn-primary:hover {
+#popupCard .btn-primary:hover {
     background: linear-gradient(135deg, #1ed760 0%, #1DB954 100%);
     color: #0a0a0a;
     border-color: #1ed760;
     transform: translateY(-2px);
     box-shadow: 0 8px 30px rgba(29, 185, 84, 0.6);
+}
+
+/* ---------- URGENT POPUP — APPLE COMBO VARIANT (pink) ---------- */
+.popup-apple .popup-card {
+    border-color: rgba(250, 37, 114, 0.4);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85),
+                0 0 80px -20px rgba(250, 37, 114, 0.5);
+}
+.popup-apple .popup-card::before {
+    background: radial-gradient(ellipse at center top,
+        rgba(250, 37, 114, 0.25),
+        rgba(250, 37, 114, 0.05) 50%,
+        transparent 80%);
+}
+.popup-apple .popup-card::after {
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(250, 37, 114, 0.8),
+        rgba(250, 37, 114, 1),
+        rgba(250, 37, 114, 0.8),
+        transparent);
+}
+.popup-apple .popup-pulse-ring {
+    border-color: rgba(250, 37, 114, 0.7);
+}
+.popup-apple .popup-logo-img {
+    border-radius: 50%;
+    box-shadow: 0 0 30px rgba(250, 37, 114, 0.6),
+                0 0 0 2px rgba(250, 37, 114, 0.3);
+}
+.popup-apple .popup-tag {
+    background: linear-gradient(135deg, #FA2572 0%, #ff5c8a 100%);
+    box-shadow: 0 0 0 0 rgba(250, 37, 114, 0.5);
+}
+.popup-apple .popup-tag,
+.popup-apple .popup-tag::before,
+.popup-apple .popup-tag::after {
+    animation: tagPulseApple 2.2s ease-in-out infinite;
+}
+@keyframes tagPulseApple {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(250, 37, 114, 0.5); }
+    50% { box-shadow: 0 0 0 8px rgba(250, 37, 114, 0); }
+}
+.popup-apple .popup-price-block {
+    background: linear-gradient(180deg, rgba(250, 37, 114, 0.08), rgba(250, 37, 114, 0.02));
+    border-color: rgba(250, 37, 114, 0.25);
+}
+.popup-apple .popup-price-new {
+    text-shadow: 0 0 20px rgba(250, 37, 114, 0.4);
+}
+.popup-apple .popup-period {
+    color: #ff5c8a;
+}
+.popup-apple .popup-urgency {
+    border-color: rgba(250, 37, 114, 0.6);
+    background: rgba(250, 37, 114, 0.06);
+}
+.popup-apple .popup-dot {
+    background: #FA2572;
+    box-shadow: 0 0 8px #FA2572;
+}
+.popup-apple .popup-dismiss:hover {
+    color: #ff5c8a;
+}
+/* CTA button — pink Apple style override */
+#popupCardApple .btn-primary {
+    background: linear-gradient(135deg, #FA2572 0%, #ff5c8a 100%);
+    color: #ffffff;
+    border-color: #FA2572;
+    box-shadow: 0 0 25px rgba(250, 37, 114, 0.4);
+}
+#popupCardApple .btn-primary:hover {
+    background: linear-gradient(135deg, #ff5c8a 0%, #FA2572 100%);
+    color: #ffffff;
+    border-color: #ff5c8a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(250, 37, 114, 0.6);
 }
 
 @media (max-width: 600px) {
