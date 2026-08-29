@@ -35,7 +35,10 @@ const STREAMING_PRODUCTS = [
       },
       urgency: 'SOLO QUEDAN 2 ÚLTIMOS CUPOS LIBRES',
       features: ['Cuenta personal', 'Sin anuncios', 'Descarga offline', 'Saltos ilimitados', 'Promo 3 meses — Antes S/45, ahora S/30'] },
-    { id: 'am', name: 'Apple Music',           icon: 'AM', logo: null,                 color: '#FA2572', desc: 'Más de 100 millones de canciones, descargas offline y audio sin pérdida.', price: 15, soldOut: true, features: ['Cuenta personal', 'Audio sin pérdida', 'Descargas offline', 'Letras en tiempo real'] }
+    { id: 'am', name: 'Apple Combo', icon: 'AP', logo: null, color: '#FA2572',
+      desc: 'Combo completo Apple: Apple Music + iCloud + Apple TV + Apple Arcade. Renovación mensual.',
+      price: 20, period: 'x mes',
+      features: ['Apple Music — audio sin pérdida', 'iCloud — almacenamiento en la nube', 'Apple TV — series y películas originales', 'Apple Arcade — +200 juegos sin anuncios', 'Renovación mensual automática', 'Garantía 30 días'] },
 ];
 
 // ---------- REDES PRODUCTS (REMOVED) ----------
@@ -97,7 +100,7 @@ function streamingCardHTML(p) {
 
     // Logo HTML: image if available, else text icon
     const logoHTML = p.logo
-        ? `<img src="${p.logo}?v=13" alt="${escapeHtml(p.name)}" class="product-logo-img">`
+        ? `<img src="${p.logo}?v=14" alt="${escapeHtml(p.name)}" class="product-logo-img">`
         : `<div class="product-icon">${p.icon}</div>`;
 
     // Tag/badge in top-right corner
