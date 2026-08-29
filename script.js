@@ -107,7 +107,7 @@ function streamingCardHTML(p) {
 
     // Logo HTML: image if available, else text icon
     const logoHTML = p.logo
-        ? `<img src="${p.logo}?v=18" alt="${escapeHtml(p.name)}" class="product-logo-img">`
+        ? `<img src="${p.logo}?v=19" alt="${escapeHtml(p.name)}" class="product-logo-img">`
         : `<div class="product-icon">${p.icon}</div>`;
 
     // Tag/badge in top-right corner
@@ -529,59 +529,74 @@ function closeUrgentPopupApple() {
 }
 
 function bindUrgentPopup() {
+    // Helper: trigger Apple popup (only if not already seen in this session)
+    function triggerApplePopup() {
+        try {
+            const appleSeen = sessionStorage.getItem(URGENT_APPLE_KEY);
+            if (!appleSeen) {
+                setTimeout(() => openUrgentPopupApple(), 1200);
+            }
+        } catch (e) {
+            setTimeout(() => openUrgentPopupApple(), 1200);
+        }
+    }
+
     // Show Spotify popup after 1.5s if not seen in this session
+    let spotifyShown = false;
     try {
         const seen = sessionStorage.getItem(URGENT_POPUP_KEY);
         if (!seen) {
+            spotifyShown = true;
             setTimeout(() => {
                 openUrgentPopup();
                 sessionStorage.setItem(URGENT_POPUP_KEY, '1');
             }, 1500);
         }
     } catch (e) {
+        spotifyShown = true;
         setTimeout(openUrgentPopup, 1500);
     }
 
-    // Spotify popup — Close button
-    const closeBtn = $('#popupClose');
-    if (closeBtn) closeBtn.addEventListener('click', closeUrgentPopup);
+    // If Spotify was already seen in this session, show Apple popup after 2.5s
+    if (!spotifyShown) {
+        setTimeout(() => {
+            try {
+                const appleSeen = sessionStorage.getItem(URGENT_APPLE_KEY);
+                if (!appleSeen) openUrgentPopupApple();
+            } catch (e) {
+                openUrgentPopupApple();
+            }
+        }, 2500);
+    }
 
-    // Spotify popup — Dismiss ("Seguir explorando") → show Apple popup next
+    // Spotify popup — Close button (X) → trigger Apple popup next
+    const closeBtn = $('#popupClose');
+    if (closeBtn) closeBtn.addEventListener('click', () => {
+        closeUrgentPopup();
+        triggerApplePopup();
+    });
+
+    // Spotify popup — Dismiss ("Seguir explorando") → trigger Apple popup next
     const dismissBtn = $('#popupDismiss');
     if (dismissBtn) {
         dismissBtn.addEventListener('click', () => {
             closeUrgentPopup();
-            // After Spotify is dismissed, show Apple popup after 1.2s
-            setTimeout(() => {
-                try {
-                    const appleSeen = sessionStorage.getItem(URGENT_APPLE_KEY);
-                    if (!appleSeen) openUrgentPopupApple();
-                } catch (e) {
-                    openUrgentPopupApple();
-                }
-            }, 1200);
+            triggerApplePopup();
         });
     }
 
-    // Spotify popup — Click outside to close → also show Apple popup next
+    // Spotify popup — Click outside to close → trigger Apple popup next
     const overlay = $('#popupOverlay');
     if (overlay) {
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
                 closeUrgentPopup();
-                setTimeout(() => {
-                    try {
-                        const appleSeen = sessionStorage.getItem(URGENT_APPLE_KEY);
-                        if (!appleSeen) openUrgentPopupApple();
-                    } catch (e) {
-                        openUrgentPopupApple();
-                    }
-                }, 1200);
+                triggerApplePopup();
             }
         });
     }
 
-    // Spotify CTA button → smooth scroll to the Spotify card
+    // Spotify CTA button → smooth scroll to the Spotify card (no Apple popup)
     const ctaBtn = $('#popupCta');
     if (ctaBtn) {
         ctaBtn.addEventListener('click', () => {
