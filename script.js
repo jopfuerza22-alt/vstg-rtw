@@ -38,6 +38,14 @@ const STREAMING_PRODUCTS = [
     { id: 'am', name: 'Apple Combo', icon: 'AP', logo: null, color: '#FA2572',
       desc: 'Combo completo Apple: Apple Music + iCloud + Apple TV + Apple Arcade. Renovación mensual.',
       price: 20, period: 'x mes',
+      bgImage: 'logo-applecombo.png',
+      customFields: {
+          nameLabel: 'Correo electrónico',
+          nameHint: 'Te enviaremos los datos de la cuenta a este correo',
+          namePlaceholder: 'tu@correo.com',
+          nameType: 'email',
+          hideSecond: true
+      },
       features: ['Apple Music — audio sin pérdida', 'iCloud — almacenamiento en la nube', 'Apple TV — series y películas originales', 'Apple Arcade — +200 juegos sin anuncios', 'Renovación mensual automática', 'Garantía 30 días'] },
 ];
 
@@ -100,7 +108,7 @@ function streamingCardHTML(p) {
 
     // Logo HTML: image if available, else text icon
     const logoHTML = p.logo
-        ? `<img src="${p.logo}?v=14" alt="${escapeHtml(p.name)}" class="product-logo-img">`
+        ? `<img src="${p.logo}?v=15" alt="${escapeHtml(p.name)}" class="product-logo-img">`
         : `<div class="product-icon">${p.icon}</div>`;
 
     // Tag/badge in top-right corner
@@ -138,9 +146,12 @@ function streamingCardHTML(p) {
     }
 
     const cardClass = isSoldOut ? 'product-card soldout' : (isOnSale ? 'product-card onsale' : 'product-card');
+    const cardExtraClass = p.bgImage ? ' has-bgimage' : '';
+    const bgStyle = p.bgImage ? ` style="background-image: url('${p.bgImage}?v=15'); --platform-color: ${platformColor};"` : ` style="--platform-color: ${platformColor};"`;
 
     return `
-        <article class="${cardClass}" data-id="${p.id}" style="--platform-color: ${platformColor};">
+        <article class="${cardClass}${cardExtraClass}" data-id="${p.id}"${bgStyle}>
+            <div class="card-bg-overlay"></div>
             ${badge}
             ${logoHTML}
             <h3 class="product-name">${p.name}</h3>
@@ -189,29 +200,49 @@ function openModal(id, type) {
         const pinLabelEl = $('#profilePinLabel');
         const pinHintEl = $('#profilePinHint');
         const pinInput = $('#profilePin');
+        const pinFormGroup = pinInput ? pinInput.closest('.form-group') : null;
 
         if (nameLabelEl) nameLabelEl.textContent = cf.nameLabel || 'Nombre del perfil';
         if (nameHintEl) nameHintEl.textContent = cf.nameHint || 'Así aparecerá tu perfil dentro de la cuenta';
         if (nameInput) nameInput.placeholder = cf.namePlaceholder || 'Ej: Juan';
-        if (nameInput) nameInput.maxLength = cf.namePlaceholder ? 50 : 20;
+        if (nameInput) nameInput.maxLength = cf.namePlaceholder ? 100 : 20;
 
-        if (pinLabelEl) pinLabelEl.textContent = cf.secondLabel || 'PIN de 4 dígitos';
-        if (pinHintEl) pinHintEl.textContent = cf.secondHint || 'PIN de seguridad para bloquear tu perfil';
-
-        if (cf.secondType === 'email') {
-            pinInput.type = 'email';
-            pinInput.inputMode = 'email';
-            pinInput.maxLength = 100;
-            pinInput.pattern = '';
-            pinInput.placeholder = cf.secondPlaceholder || 'tu@correo.com';
-            pinInput.dataset.mode = 'email';
+        // Configure name input type (email or text)
+        if (cf.nameType === 'email') {
+            nameInput.type = 'email';
+            nameInput.inputMode = 'email';
+            nameInput.dataset.mode = 'email';
         } else {
-            pinInput.type = 'text';
-            pinInput.inputMode = 'numeric';
-            pinInput.maxLength = 4;
-            pinInput.pattern = '\\d{4}';
-            pinInput.placeholder = '1234';
-            pinInput.dataset.mode = 'pin';
+            nameInput.type = 'text';
+            nameInput.inputMode = 'text';
+            nameInput.dataset.mode = 'text';
+        }
+
+        // Hide the second field (PIN) entirely when cf.hideSecond is true
+        if (cf.hideSecond) {
+            if (pinFormGroup) pinFormGroup.style.display = 'none';
+            pinInput.value = '';
+            pinInput.required = false;
+        } else {
+            if (pinFormGroup) pinFormGroup.style.display = '';
+            if (pinLabelEl) pinLabelEl.textContent = cf.secondLabel || 'PIN de 4 dígitos';
+            if (pinHintEl) pinHintEl.textContent = cf.secondHint || 'PIN de seguridad para bloquear tu perfil';
+
+            if (cf.secondType === 'email') {
+                pinInput.type = 'email';
+                pinInput.inputMode = 'email';
+                pinInput.maxLength = 100;
+                pinInput.pattern = '';
+                pinInput.placeholder = cf.secondPlaceholder || 'tu@correo.com';
+                pinInput.dataset.mode = 'email';
+            } else {
+                pinInput.type = 'text';
+                pinInput.inputMode = 'numeric';
+                pinInput.maxLength = 4;
+                pinInput.pattern = '\\d{4}';
+                pinInput.placeholder = '1234';
+                pinInput.dataset.mode = 'pin';
+            }
         }
 
         // Urgency banner
@@ -325,8 +356,11 @@ function updateCartUI() {
             const nameLabel = item.nameLabel || 'Perfil';
             const secondLabel = item.secondLabel || 'PIN';
             meta = `
-                <span class="cart-item-meta"><strong>${escapeHtml(nameLabel)}:</strong> ${escapeHtml(item.profileName)}</span>
+                <span class="cart-item-meta"><strong>${escapeHtml(nameLabel)}:</strong> ${escapeHtml(item.profileName)}</span>`;
+            if (!item.hideSecond && item.profilePin) {
+                meta += `
                 <span class="cart-item-meta"><strong>${escapeHtml(secondLabel)}:</strong> ${escapeHtml(item.profilePin)}</span>`;
+            }
         } else {
             meta = `
                 <span class="cart-item-meta"><strong>Cantidad:</strong> ${formatQty(item.qty)}</span>
@@ -451,6 +485,15 @@ function bindPinInput() {
         if (e.target.dataset.mode === 'email') return;
         e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
     });
+
+    // Name input (for Apple Combo) also has email mode — no mask needed, but we keep dataset.mode in sync
+    const nameInput = $('#profileName');
+    if (nameInput) {
+        nameInput.addEventListener('input', (e) => {
+            // No mask for email or text — just clear invalid state
+            e.target.classList.remove('invalid');
+        });
+    }
 }
 
 // ---------- URGENT POPUP (Spotify Premium on load) ----------
@@ -546,33 +589,49 @@ function handleAddToCart() {
         const nameInput = $('#profileName');
         const pinInput = $('#profilePin');
         const name = nameInput.value.trim();
-        const secondValue = pinInput.value.trim();
+        const secondValue = cf.hideSecond ? '' : pinInput.value.trim();
         const nameLabel = cf.nameLabel || 'Nombre del perfil';
         const secondLabel = cf.secondLabel || 'PIN';
         const secondType = cf.secondType || 'pin';
+        const nameType = cf.nameType || 'text';
 
         let valid = true;
-        if (name.length < 2 || name.length > 50) { nameInput.classList.add('invalid'); valid = false; }
-        else nameInput.classList.remove('invalid');
-
-        if (secondType === 'email') {
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(secondValue)) {
-                pinInput.classList.add('invalid'); valid = false;
-            } else pinInput.classList.remove('invalid');
+        // Validate the first field (name or email)
+        if (nameType === 'email') {
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(name)) {
+                nameInput.classList.add('invalid'); valid = false;
+            } else nameInput.classList.remove('invalid');
         } else {
-            if (!/^\d{4}$/.test(secondValue)) { pinInput.classList.add('invalid'); valid = false; }
-            else pinInput.classList.remove('invalid');
+            if (name.length < 2 || name.length > 50) {
+                nameInput.classList.add('invalid'); valid = false;
+            } else nameInput.classList.remove('invalid');
+        }
+
+        // Validate the second field (only when not hidden)
+        if (!cf.hideSecond) {
+            if (secondType === 'email') {
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(secondValue)) {
+                    pinInput.classList.add('invalid'); valid = false;
+                } else pinInput.classList.remove('invalid');
+            } else {
+                if (!/^\d{4}$/.test(secondValue)) { pinInput.classList.add('invalid'); valid = false; }
+                else pinInput.classList.remove('invalid');
+            }
+        } else {
+            pinInput.classList.remove('invalid');
         }
 
         if (!valid) { showToast('Revisa los datos ingresados'); return; }
 
+        // For Apple Combo (hideSecond), use empty string for profilePin
         addToCart({
             id, type: 'streaming',
             price: p.price,
             profileName: name,
             profilePin: secondValue,
             nameLabel,
-            secondLabel
+            secondLabel,
+            hideSecond: !!cf.hideSecond
         });
     }
     // (redes branch removed — only streaming products exist now)
@@ -628,7 +687,9 @@ function buildWhatsAppMessage() {
             msg += `%0A${i + 1}. ${p.name}%0A`;
             msg += `   Precio: ${formatPrice(item.price)}${encodeURIComponent(periodLabel)}%0A`;
             msg += `   ${encodeURIComponent(nameLabel)}: ${encodeURIComponent(item.profileName)}%0A`;
-            msg += `   ${encodeURIComponent(secondLabel)}: ${encodeURIComponent(item.profilePin)}%0A`;
+            if (!item.hideSecond && item.profilePin) {
+                msg += `   ${encodeURIComponent(secondLabel)}: ${encodeURIComponent(item.profilePin)}%0A`;
+            }
         });
         msg += `%0A`;
     }
