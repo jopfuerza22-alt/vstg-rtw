@@ -458,7 +458,7 @@ input, select, textarea { font-family: inherit; }
     width: 56px; height: 56px;
     object-fit: contain;
     margin-bottom: 1.5rem;
-    border-radius: 8px;
+    border-radius: 50%;
     padding: 6px;
     background: #ffffff;
     border: 1px solid color-mix(in srgb, var(--platform-color, #fafafa) 40%, #404040);
@@ -1228,14 +1228,6 @@ input, select, textarea { font-family: inherit; }
                     0 25px 50px -20px rgba(0,0,0,0.8);
         transform: translateY(0) scale(1);
     }
-}
-
-/* ---------- PRODUCT CARD LOGO OVERRIDE (Apple Combo: circular) ---------- */
-.product-card[data-id="am"] .product-logo-img {
-    border-radius: 50%;
-    padding: 4px;
-    object-fit: cover;
-    object-position: center;
 }
 
 /* ---------- CART DRAWER ---------- */
