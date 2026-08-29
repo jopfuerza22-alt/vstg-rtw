@@ -1230,6 +1230,41 @@ input, select, textarea { font-family: inherit; }
     }
 }
 
+/* ---------- PRODUCT CARD WITH BG IMAGE (Apple Combo) ---------- */
+.product-card.has-bgimage {
+    background-image: var(--card-bg-image, none);
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-color: var(--bg-card);
+}
+.product-card.has-bgimage .card-bg-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 180px;
+    background: linear-gradient(180deg,
+        rgba(10, 10, 10, 0.2) 0%,
+        rgba(10, 10, 10, 0.6) 60%,
+        var(--bg-card) 100%);
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 6px 6px 0 0;
+}
+/* Push content above overlay */
+.product-card.has-bgimage > *:not(.card-bg-overlay) {
+    position: relative;
+    z-index: 2;
+}
+/* When bg image is present, hide the icon/text logo (it's already in the bg) */
+.product-card.has-bgimage .product-logo-img,
+.product-card.has-bgimage .product-icon {
+    display: none;
+}
+/* The card already has its own bg image, so adjust the platform gradient strip */
+.product-card.has-bgimage::before {
+    z-index: 3;
+}
+
 /* ---------- CART DRAWER ---------- */
 .cart-overlay {
     position: fixed; inset: 0;
