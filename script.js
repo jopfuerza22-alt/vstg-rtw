@@ -107,7 +107,7 @@ function streamingCardHTML(p) {
 
     // Logo HTML: image if available, else text icon
     const logoHTML = p.logo
-        ? `<img src="${p.logo}?v=17" alt="${escapeHtml(p.name)}" class="product-logo-img">`
+        ? `<img src="${p.logo}?v=18" alt="${escapeHtml(p.name)}" class="product-logo-img">`
         : `<div class="product-icon">${p.icon}</div>`;
 
     // Tag/badge in top-right corner
@@ -510,8 +510,26 @@ function closeUrgentPopup() {
     document.body.style.overflow = '';
 }
 
+// ---------- URGENT POPUP (Apple Combo — second in sequence) ----------
+const URGENT_APPLE_KEY = 'vstg_popup_apple_seen_v1';
+
+function openUrgentPopupApple() {
+    const overlay = $('#popupOverlayApple');
+    if (!overlay) return;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeUrgentPopupApple() {
+    const overlay = $('#popupOverlayApple');
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    try { sessionStorage.setItem(URGENT_APPLE_KEY, '1'); } catch (e) {}
+}
+
 function bindUrgentPopup() {
-    // Show popup after 1.5s if not seen in this session
+    // Show Spotify popup after 1.5s if not seen in this session
     try {
         const seen = sessionStorage.getItem(URGENT_POPUP_KEY);
         if (!seen) {
@@ -521,45 +539,107 @@ function bindUrgentPopup() {
             }, 1500);
         }
     } catch (e) {
-        // sessionStorage might be blocked; show popup anyway
         setTimeout(openUrgentPopup, 1500);
     }
 
-    // Close button
+    // Spotify popup — Close button
     const closeBtn = $('#popupClose');
     if (closeBtn) closeBtn.addEventListener('click', closeUrgentPopup);
 
-    // Dismiss ("Seguir explorando")
+    // Spotify popup — Dismiss ("Seguir explorando") → show Apple popup next
     const dismissBtn = $('#popupDismiss');
-    if (dismissBtn) dismissBtn.addEventListener('click', closeUrgentPopup);
-
-    // Click outside to close
-    const overlay = $('#popupOverlay');
-    if (overlay) {
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeUrgentPopup();
+    if (dismissBtn) {
+        dismissBtn.addEventListener('click', () => {
+            closeUrgentPopup();
+            // After Spotify is dismissed, show Apple popup after 1.2s
+            setTimeout(() => {
+                try {
+                    const appleSeen = sessionStorage.getItem(URGENT_APPLE_KEY);
+                    if (!appleSeen) openUrgentPopupApple();
+                } catch (e) {
+                    openUrgentPopupApple();
+                }
+            }, 1200);
         });
     }
 
-    // CTA button → smooth scroll to the Spotify card in the streaming section
+    // Spotify popup — Click outside to close → also show Apple popup next
+    const overlay = $('#popupOverlay');
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeUrgentPopup();
+                setTimeout(() => {
+                    try {
+                        const appleSeen = sessionStorage.getItem(URGENT_APPLE_KEY);
+                        if (!appleSeen) openUrgentPopupApple();
+                    } catch (e) {
+                        openUrgentPopupApple();
+                    }
+                }, 1200);
+            }
+        });
+    }
+
+    // Spotify CTA button → smooth scroll to the Spotify card
     const ctaBtn = $('#popupCta');
     if (ctaBtn) {
         ctaBtn.addEventListener('click', () => {
             closeUrgentPopup();
-            // Find the Spotify product card in the streaming grid
             const spotifyCard = document.querySelector('[data-id="sp"]');
             if (spotifyCard) {
                 setTimeout(() => {
                     const top = spotifyCard.getBoundingClientRect().top + window.pageYOffset - 80;
                     window.scrollTo({ top, behavior: 'smooth' });
-                    // Briefly highlight the card to draw attention
                     setTimeout(() => {
                         spotifyCard.classList.add('card-highlight');
                         setTimeout(() => spotifyCard.classList.remove('card-highlight'), 2000);
                     }, 700);
                 }, 300);
             } else {
-                // Fallback: scroll to streaming section
+                const streamingSection = document.getElementById('streaming');
+                if (streamingSection) {
+                    const top = streamingSection.getBoundingClientRect().top + window.pageYOffset - 60;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                }
+            }
+        });
+    }
+}
+
+function bindUrgentPopupApple() {
+    // Apple popup — Close button
+    const closeBtn = $('#popupCloseApple');
+    if (closeBtn) closeBtn.addEventListener('click', closeUrgentPopupApple);
+
+    // Apple popup — Dismiss
+    const dismissBtn = $('#popupDismissApple');
+    if (dismissBtn) dismissBtn.addEventListener('click', closeUrgentPopupApple);
+
+    // Apple popup — Click outside to close
+    const overlay = $('#popupOverlayApple');
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeUrgentPopupApple();
+        });
+    }
+
+    // Apple CTA button → smooth scroll to the Apple Combo card
+    const ctaBtn = $('#popupCtaApple');
+    if (ctaBtn) {
+        ctaBtn.addEventListener('click', () => {
+            closeUrgentPopupApple();
+            const appleCard = document.querySelector('[data-id="am"]');
+            if (appleCard) {
+                setTimeout(() => {
+                    const top = appleCard.getBoundingClientRect().top + window.pageYOffset - 80;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                    setTimeout(() => {
+                        appleCard.classList.add('card-highlight');
+                        setTimeout(() => appleCard.classList.remove('card-highlight'), 2000);
+                    }, 700);
+                }, 300);
+            } else {
                 const streamingSection = document.getElementById('streaming');
                 if (streamingSection) {
                     const top = streamingSection.getBoundingClientRect().top + window.pageYOffset - 60;
@@ -778,8 +858,9 @@ document.addEventListener('DOMContentLoaded', () => {
     animateCounters();
     bindPinInput();
 
-    // Bind urgent popup (Spotify Premium promo on load)
+    // Bind urgent popups (Spotify + Apple Combo promos on load)
     bindUrgentPopup();
+    bindUrgentPopupApple();
 
     // ESC closes everything
     document.addEventListener('keydown', (e) => {
@@ -787,6 +868,7 @@ document.addEventListener('DOMContentLoaded', () => {
             closeCart();
             closeModal();
             closeUrgentPopup();
+            closeUrgentPopupApple();
         }
     });
 
